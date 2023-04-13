@@ -41,7 +41,7 @@ namespace GravityFun
                     }
                 }
 
-                write_buffer[i].Position = read_buffer[i].Position;
+                write_buffer[i].Position = read_buffer[i].Position; // TODO: exit collision radius to avoid repeating the collision calculations
 
                 if (collided.size() == 0)
                 {
@@ -69,7 +69,7 @@ namespace GravityFun
                 }
                 rebound /= collided.size();
 
-                write_buffer[i].Velocity = shared_velocity + rebound;
+                write_buffer[i].Velocity = shared_velocity + rebound * GameManager::COLLISION_PRESERVE;
             }
         }
         else // Normal mode (forces, motion, and border collision)
@@ -95,8 +95,8 @@ namespace GravityFun
                     }
                 }
                 net_acceleration.y -= down_acceleration;
-                write_buffer[i].Velocity = read_buffer[i].Velocity + net_acceleration;
-                write_buffer[i].Position = read_buffer[i].Position + write_buffer[i].Velocity;
+                write_buffer[i].Velocity = read_buffer[i].Velocity + net_acceleration; // TODO: Use time diff
+                write_buffer[i].Position = read_buffer[i].Position + write_buffer[i].Velocity; // TODO: Use time diff
                 if (col)
                 {
                     if (write_buffer[i].Position.x < -bx)
