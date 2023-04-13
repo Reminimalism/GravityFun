@@ -14,7 +14,17 @@ namespace GravityFun::Math
         double y;
 
         Vec2 operator+(const Vec2&) const;
+        Vec2 operator-(const Vec2&) const;
+        Vec2& operator+=(const Vec2&);
+        Vec2& operator-=(const Vec2&);
         Vec2 operator*(const double&) const;
+        Vec2 operator/(const double&) const;
+        Vec2& operator*=(const double&);
+        Vec2& operator/=(const double&);
+
+        double GetMagnitude() const;
+        Vec2 GetNormalized() const;
+        double GetDotProduct(const Vec2&) const;
     };
 
     class Matrix4x4

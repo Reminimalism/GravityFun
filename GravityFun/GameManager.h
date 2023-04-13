@@ -56,6 +56,7 @@ namespace GravityFun
         static constexpr double COLLISION_LOSS = 0.1;
         /// @brief Used for physics. COLLISION_PRESERVE = 1 - COLLISION_LOSS
         static constexpr double COLLISION_PRESERVE = 1 - COLLISION_LOSS;
+        static constexpr double DOWN_GRAVITY_ACCELERATION = 1;
 
         int GetObjectsCount();
         double GetTimeMultiplier();

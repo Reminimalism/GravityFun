@@ -12,9 +12,54 @@ namespace GravityFun::Math
     {
         return Vec2(x + other.x, y + other.y);
     }
+    Vec2 Vec2::operator-(const Vec2& other) const
+    {
+        return Vec2(x - other.x, y - other.y);
+    }
+    Vec2& Vec2::operator+=(const Vec2& other)
+    {
+        x += other.x;
+        y += other.y;
+        return *this;
+    }
+    Vec2& Vec2::operator-=(const Vec2& other)
+    {
+        x -= other.x;
+        y -= other.y;
+        return *this;
+    }
     Vec2 Vec2::operator*(const double& other) const
     {
         return Vec2(x * other, y * other);
+    }
+    Vec2 Vec2::operator/(const double& other) const
+    {
+        return Vec2(x / other, y / other);
+    }
+    Vec2& Vec2::operator*=(const double& other)
+    {
+        x *= other;
+        y *= other;
+        return *this;
+    }
+    Vec2& Vec2::operator/=(const double& other)
+    {
+        x /= other;
+        y /= other;
+        return *this;
+    }
+
+    double Vec2::GetMagnitude() const
+    {
+        return std::sqrt(x * x + y * y);
+    }
+    Vec2 Vec2::GetNormalized() const
+    {
+        return *this / GetMagnitude();
+    }
+    double Vec2::GetDotProduct(const Vec2& other) const
+    {
+        return x * other.x + y * other.y;
     }
 
     Matrix4x4::Matrix4x4()
