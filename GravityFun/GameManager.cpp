@@ -16,7 +16,7 @@ namespace GravityFun
         : _Window(window), _PhysicsPassNotifier(new PhysicsPassNotifier(this)),
           ObjectsCount(DEFAULT_OBJECTS_COUNT), TimeMultiplier(DEFAULT_TIME_MULTIPLIER),
           DownGravityOn(false), RelativeGravityOn(false),
-          VariableWeightOn(false),
+          VariableMassOn(false),
           BorderCollisionOn(true), ObjectCollisionOn(false),
           BorderX(1), BorderY(1),
           RenderBufferIndex(0),
@@ -47,6 +47,19 @@ namespace GravityFun
         std::swap(RenderBufferIndex, PhysicsPass2WriteBufferIndex);
         PhysicsPass1ReadBufferIndex = RenderBufferIndex;
 
+        // Toggles
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_G))
+            DownGravityOn = !DownGravityOn;
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_R))
+            RelativeGravityOn = !RelativeGravityOn;
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_M))
+            VariableMassOn = !VariableMassOn;
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_B))
+            BorderCollisionOn = !BorderCollisionOn;
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_C))
+            ObjectCollisionOn = !ObjectCollisionOn;
+
+        // Objects count
         if (_Window->GetPressedKeys().contains(GLFW_KEY_UP)
             && _Window->GetReleasedKeys().contains(GLFW_KEY_UP))
         {
@@ -62,8 +75,31 @@ namespace GravityFun
                 ObjectsCount = temp;
         }
 
-        // TODO: Update buffers based on ObjectsCount
+        // Update buffers based on objects count
+        if (ObjectsCount < ObjectBuffers[RenderBufferIndex].size())
+        {
+            for (int i = 0; i < 3; i++)
+                ObjectBuffers[i].resize(ObjectsCount);
+        }
+        if (ObjectBuffers[RenderBufferIndex].size() < ObjectsCount)
+        {
+            int new_count = ObjectsCount - ObjectBuffers[RenderBufferIndex].size();
+            for (int i = 0; i < new_count; i++)
+            {
+                double mass = VariableMassOn ? _Random.GetDouble(MIN_MASS, MAX_MASS) : DEFAULT_MASS;
+                FloatingObject new_obj(
+                    mass,
+                    Math::Vec2(
+                        _Random.GetDouble(-BorderX + mass * MASS_TO_RADIUS, BorderX - mass * MASS_TO_RADIUS),
+                        _Random.GetDouble(-BorderY + mass * MASS_TO_RADIUS, BorderY - mass * MASS_TO_RADIUS)
+                    )
+                );
+                for (int j = 0; j < 3; j++)
+                    ObjectBuffers[i].push_back(new_obj);
+            }
+        }
 
+        // Time multiplier
         if (_Window->GetPressedKeys().contains(GLFW_KEY_LEFT)
             && _Window->GetReleasedKeys().contains(GLFW_KEY_LEFT))
         {
@@ -79,17 +115,7 @@ namespace GravityFun
                 TimeMultiplier = temp;
         }
 
-        if (_Window->GetPressedKeys().contains(GLFW_KEY_G))
-            DownGravityOn = !DownGravityOn;
-        if (_Window->GetPressedKeys().contains(GLFW_KEY_R))
-            RelativeGravityOn = !RelativeGravityOn;
-        if (_Window->GetPressedKeys().contains(GLFW_KEY_W))
-            VariableWeightOn = !VariableWeightOn;
-        if (_Window->GetPressedKeys().contains(GLFW_KEY_B))
-            BorderCollisionOn = !BorderCollisionOn;
-        if (_Window->GetPressedKeys().contains(GLFW_KEY_C))
-            ObjectCollisionOn = !ObjectCollisionOn;
-
+        // Update AspectRatio, BorderX, and BorderY
         int width, height;
         _Window->GetSize(width, height);
         AspectRatio = width / height;
@@ -144,9 +170,9 @@ namespace GravityFun
     {
         return RelativeGravityOn;
     }
-    bool GameManager::IsVariableWeightOn()
+    bool GameManager::IsVariableMassOn()
     {
-        return VariableWeightOn;
+        return VariableMassOn;
     }
     bool GameManager::IsBorderCollisionOn()
     {

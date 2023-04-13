@@ -61,7 +61,7 @@ namespace GravityFun
         double GetTimeMultiplier();
         bool IsDownGravityOn();
         bool IsRelativeGravityOn();
-        bool IsVariableWeightOn();
+        bool IsVariableMassOn();
         bool IsBorderCollisionOn();
         bool IsObjectCollisionOn();
         double GetBorderX();
@@ -91,7 +91,7 @@ namespace GravityFun
         double TimeMultiplier;
         bool DownGravityOn;
         bool RelativeGravityOn;
-        bool VariableWeightOn;
+        bool VariableMassOn;
         bool BorderCollisionOn;
         bool ObjectCollisionOn;
         double BorderX;
