@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Gravity Fun
+GenericName=Gravity Fun
+Comment=Fun with gravity
+Exec=/path/to/GravityFun
+Icon=/path/to/GravityFun.svg
+Terminal=false
+Type=Application
+Categories=Game;
+
+# To be added to ~/.local/share/applications
