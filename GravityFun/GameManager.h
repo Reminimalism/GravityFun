@@ -47,7 +47,7 @@ namespace GravityFun
         static constexpr double MIN_MASS = 0.5;
         static constexpr double MAX_MASS = 2;
         /// @brief Converts object mass to object size's radius when multiplied by mass.
-        static constexpr double MASS_TO_RADIUS = 0.1;
+        static constexpr double MASS_TO_RADIUS = 0.01;
         static constexpr double DEFAULT_TIME_MULTIPLIER = 1;
         static constexpr double MIN_TIME_MULTIPLIER = 0.125;
         static constexpr double MAX_TIME_MULTIPLIER = 8;

@@ -71,7 +71,7 @@ int main()
 
     LoopScheduler::Loop loop(root_group);
 
-    loop.Run(hardware_concurrency + 1);
+    loop.Run(hardware_concurrency + 1); // TODO: Support multiple SequentialGroup runs in ParallelGroup
 
     return 0;
 }

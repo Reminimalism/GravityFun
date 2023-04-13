@@ -92,6 +92,7 @@ namespace GravityFun
         MouseMiddleButton = glfwGetMouseButton(_GLFWWindow, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
         PressedKeys.clear();
         ReleasedKeys.clear();
+        RepeatedKeys.clear();
         glfwPollEvents();
     }
 

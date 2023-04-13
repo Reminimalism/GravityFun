@@ -61,14 +61,14 @@ namespace GravityFun
 
         // Objects count
         if (_Window->GetPressedKeys().contains(GLFW_KEY_UP)
-            && _Window->GetReleasedKeys().contains(GLFW_KEY_UP))
+            || _Window->GetRepeatedKeys().contains(GLFW_KEY_UP))
         {
             auto temp = ObjectsCount + 1;
             if (temp <= MAX_OBJECTS_COUNT)
                 ObjectsCount = temp;
         }
         if (_Window->GetPressedKeys().contains(GLFW_KEY_DOWN)
-            && _Window->GetReleasedKeys().contains(GLFW_KEY_DOWN))
+            || _Window->GetRepeatedKeys().contains(GLFW_KEY_DOWN))
         {
             auto temp = ObjectsCount - 1;
             if (MIN_OBJECTS_COUNT <= temp)
@@ -95,20 +95,20 @@ namespace GravityFun
                     )
                 );
                 for (int j = 0; j < 3; j++)
-                    ObjectBuffers[i].push_back(new_obj);
+                    ObjectBuffers[j].push_back(new_obj);
             }
         }
 
         // Time multiplier
         if (_Window->GetPressedKeys().contains(GLFW_KEY_LEFT)
-            && _Window->GetReleasedKeys().contains(GLFW_KEY_LEFT))
+            || _Window->GetRepeatedKeys().contains(GLFW_KEY_LEFT))
         {
             auto temp = TimeMultiplier * 0.5;
             if (MIN_TIME_MULTIPLIER <= temp)
                 TimeMultiplier = temp;
         }
         if (_Window->GetPressedKeys().contains(GLFW_KEY_RIGHT)
-            && _Window->GetReleasedKeys().contains(GLFW_KEY_RIGHT))
+            || _Window->GetRepeatedKeys().contains(GLFW_KEY_RIGHT))
         {
             auto temp = TimeMultiplier * 2;
             if (temp <= MAX_TIME_MULTIPLIER)
@@ -118,7 +118,7 @@ namespace GravityFun
         // Update AspectRatio, BorderX, and BorderY
         int width, height;
         _Window->GetSize(width, height);
-        AspectRatio = width / height;
+        AspectRatio = (double)width / height;
         BorderX = AspectRatio;
         BorderY = 1;
     }

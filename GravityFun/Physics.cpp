@@ -72,7 +72,7 @@ namespace GravityFun
                 write_buffer[i].Velocity = shared_velocity + rebound * GameManager::COLLISION_PRESERVE;
             }
         }
-        else // Normal mode (forces, motion, and border collision)
+        else // Normal mode (forces, motion, and border collision) // TODO: Mouse gravity/brake/...
         {
             bool g = _GameManager->IsRelativeGravityOn();
             bool col = _GameManager->IsBorderCollisionOn();
@@ -95,8 +95,8 @@ namespace GravityFun
                     }
                 }
                 net_acceleration.y -= down_acceleration;
-                write_buffer[i].Velocity = read_buffer[i].Velocity + net_acceleration; // TODO: Use time diff
-                write_buffer[i].Position = read_buffer[i].Position + write_buffer[i].Velocity; // TODO: Use time diff
+                write_buffer[i].Velocity = read_buffer[i].Velocity + net_acceleration * 0.01; // TODO: Use time diff
+                write_buffer[i].Position = read_buffer[i].Position + write_buffer[i].Velocity * 0.01; // TODO: Use time diff
                 if (col)
                 {
                     if (write_buffer[i].Position.x < -bx)

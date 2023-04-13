@@ -6,6 +6,7 @@
 #include "BufferGeneration.h"
 #include "Shaders.h"
 #include "Window.h"
+#include "GameManager.h"
 
 constexpr int CIRCLE_RESOLUTION = 80;
 
@@ -58,6 +59,8 @@ namespace GravityFun
 
     void Renderer::OnRun()
     {
+        UpdateView();
+
         _Window->MakeCurrent();
 
         glClearColor(0, 0, 0, 1);
@@ -78,16 +81,26 @@ namespace GravityFun
         //...
 
         // Objects
-        // TODO
+        for (const auto& item : _GameManager->GetRenderBuffer())
+        {
+            glUniform3f(ProgramColorUniform, 1, 1, 1);
+            auto model_matrix =
+                Math::Matrix4x4::Translation(item.Position.x, item.Position.y, 0)
+                * Math::Matrix4x4::Scale(
+                    item.Mass * GameManager::MASS_TO_RADIUS,
+                    item.Mass * GameManager::MASS_TO_RADIUS,
+                    1
+                );
+            glUniformMatrix4fv(ProgramModelUniform, 1, GL_FALSE, model_matrix.GetData());
+            Circle.Render();
+        }
 
         _Window->SwapBuffers();
     }
 
-    void Renderer::UpdateView() // TODO: call when needed
+    void Renderer::UpdateView()
     {
-        // TODO:
-        //ViewMatrix = Math::Matrix4x4::Translation(?, ?, 0)
-        //        * Math::Matrix4x4::Scale(?, ?, -1);
+        ViewMatrix = Math::Matrix4x4::Scale(1 / _GameManager->GetBorderX(), 1 / _GameManager->GetBorderY(), -1);
         ProjectionMatrix = Math::Matrix4x4();
     }
 }
