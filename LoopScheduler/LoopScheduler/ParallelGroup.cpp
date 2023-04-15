@@ -24,11 +24,17 @@
 #include <utility>
 
 #include "Module.h"
+#include "BiasedEMATimeSpanPredictor.h"
 
 namespace LoopScheduler
 {
-    ParallelGroup::ParallelGroup(std::vector<ParallelGroupMember> Members)
-        : Members(Members), RunningThreadsCount(0), NotifyingCounter(0)
+    ParallelGroup::ParallelGroup(
+            std::vector<ParallelGroupMember> Members,
+            bool ExtendIterationForAdditionalGroupRuns,
+            std::unique_ptr<TimeSpanPredictor> HigherExecutionTimePredictor,
+            std::unique_ptr<TimeSpanPredictor> LowerExecutionTimePredictor
+        ) : Members(Members), ExtendIterationForAdditionalGroupRuns(ExtendIterationForAdditionalGroupRuns),
+            RunningThreadsCount(0), NotifyingCounter(0), RunNextCount(0), MeasuringTimespan(false)
     {
         std::vector<std::shared_ptr<Group>> member_groups;
         std::vector<std::shared_ptr<Module>> member_modules;
@@ -39,6 +45,25 @@ namespace LoopScheduler
                 member_modules.push_back(std::get<std::shared_ptr<Module>>(member.Member));
 
         IntroduceMembers(std::move(member_groups), std::move(member_modules));
+
+        if (HigherExecutionTimePredictor == nullptr)
+            HigherExecutionTimePredictor = std::unique_ptr<BiasedEMATimeSpanPredictor>(
+                new BiasedEMATimeSpanPredictor(
+                    0,
+                    BiasedEMATimeSpanPredictor::DEFAULT_FAST_ALPHA,
+                    BiasedEMATimeSpanPredictor::DEFAULT_SLOW_ALPHA
+                )
+            );
+        if (LowerExecutionTimePredictor == nullptr)
+            LowerExecutionTimePredictor = std::unique_ptr<BiasedEMATimeSpanPredictor>(
+                new BiasedEMATimeSpanPredictor(
+                    0,
+                    BiasedEMATimeSpanPredictor::DEFAULT_SLOW_ALPHA,
+                    BiasedEMATimeSpanPredictor::DEFAULT_FAST_ALPHA
+                )
+            );
+        this->HigherExecutionTimePredictor = std::move(HigherExecutionTimePredictor);
+        this->LowerExecutionTimePredictor = std::move(LowerExecutionTimePredictor);
 
         StartNextIterationForThisGroup();
         for (auto& member : Members)
@@ -82,6 +107,8 @@ namespace LoopScheduler
         std::unique_lock<std::shared_mutex> lock(MembersSharedMutex);
         int this_run_next_count = ++RunNextCount;
 
+        TimespanMeasurementStart();
+
         for (std::list<int>::iterator i = MainQueue.begin(); i != MainQueue.end();)
         {
             auto& member = Members[*i];
@@ -110,11 +137,12 @@ namespace LoopScheduler
                     for (int j = 0; j < member.RunSharesAfterFirstRun; j++)
                         SecondaryQueue.push_back(*i);
                     MainQueue.erase(i++);
+                    TimespanMeasurementStop();
                     continue; // Incremented already
                 }
-                else if (g->IsRunAvailable())
+                else if (g->IsRunAvailable(MaxEstimatedExecutionTime))
                 {
-                    if (RunGroup(g, lock))
+                    if (RunGroup(g, lock, MaxEstimatedExecutionTime))
                     {
                         return true;
                     }
@@ -147,11 +175,35 @@ namespace LoopScheduler
             else
             {
                 auto& g = std::get<std::shared_ptr<Group>>(member.Member);
-                if (g->IsRunAvailable())
+                if (
+                        ExtendIterationForAdditionalGroupRuns
+                        && MaxEstimatedExecutionTime != 0 // Not when MaxEstimatedExecutionTime is not specified
+                        && g->PredictHigherExecutionTime() <= MaxEstimatedExecutionTime
+                    )
+                {
+                    MainQueue.push_back(*i);
+                    int temp = *i;
+                    //SecondaryQueue.erase(i++);
+                    for (std::list<int>::iterator j = SecondaryQueue.begin(); j != SecondaryQueue.end();)
+                    {
+                        if (temp == *j)
+                            SecondaryQueue.erase(j++);
+                        else
+                            j++;
+                    }
+                    g->StartNextIteration();
+                    if (RunGroup(g, lock, MaxEstimatedExecutionTime))
+                    {
+                        return true;
+                    }
+                    // The list is modified.
+                    return false;
+                }
+                else if (g->IsRunAvailable(MaxEstimatedExecutionTime))
                 {
                     SecondaryQueue.push_back(*i);
                     SecondaryQueue.erase(i++);
-                    if (RunGroup(g, lock))
+                    if (RunGroup(g, lock, MaxEstimatedExecutionTime))
                     {
                         return true;
                     }
@@ -178,6 +230,7 @@ namespace LoopScheduler
             for (int j = 0; j < move_to_to_list_count; j++)
                 to_list.push_back(*item_to_move);
             from_list.erase(item_to_move);
+            TimespanMeasurementStop();
             auto& runinfo = ModulesRunCountsAndPredictedStopTimes[m];
             {
                 DoubleIncrementGuardLockingAndCountingOnDecrement increment_guard(
@@ -196,7 +249,7 @@ namespace LoopScheduler
         }
         return false;
     }
-    inline bool ParallelGroup::RunGroup(std::shared_ptr<Group>& g, std::unique_lock<std::shared_mutex>& lock)
+    inline bool ParallelGroup::RunGroup(std::shared_ptr<Group>& g, std::unique_lock<std::shared_mutex>& lock, double MaxEstimatedExecutionTime)
     {
         auto& runcounts = GroupsRunCounts[g];
         bool success;
@@ -205,12 +258,32 @@ namespace LoopScheduler
                 runcounts.value, RunningThreadsCount, NotifyingCounter, lock, NextEventConditionVariable
             );
             lock.unlock();
-            success = g->RunNext();
+            success = g->RunNext(MaxEstimatedExecutionTime);
         }
         lock.lock();
         if (runcounts.value == 0)
             GroupsRunCounts.erase(g);
         return success;
+    }
+
+    inline void ParallelGroup::TimespanMeasurementStart()
+    {
+        if (SecondaryQueue.size() == 0 && !MeasuringTimespan)
+        {
+            IterationStartTime = std::chrono::steady_clock::now();
+            MeasuringTimespan = true;
+        }
+    }
+    inline void ParallelGroup::TimespanMeasurementStop()
+    {
+        if (MainQueue.size() == 0 && MeasuringTimespan)
+        {
+            std::chrono::duration<double> duration = std::chrono::steady_clock::now() - IterationStartTime;
+            double time = duration.count();
+            HigherExecutionTimePredictor->ReportObservation(time);
+            LowerExecutionTimePredictor->ReportObservation(time);
+            MeasuringTimespan = false;
+        }
     }
 
     bool ParallelGroup::IsRunAvailable(double MaxEstimatedExecutionTime)
@@ -374,6 +447,17 @@ namespace LoopScheduler
             result = std::max(result, item.first->PredictLowerRemainingExecutionTime());
         }
         return result;
+    }
+
+    double ParallelGroup::PredictHigherExecutionTime()
+    {
+        std::shared_lock<std::shared_mutex> lock(MembersSharedMutex);
+        return HigherExecutionTimePredictor->Predict();
+    }
+    double ParallelGroup::PredictLowerExecutionTime()
+    {
+        std::shared_lock<std::shared_mutex> lock(MembersSharedMutex);
+        return LowerExecutionTimePredictor->Predict();
     }
 
     bool ParallelGroup::UpdateLoop(Loop * LoopPtr)

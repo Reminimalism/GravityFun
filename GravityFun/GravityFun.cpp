@@ -20,16 +20,17 @@ int main()
     std::shared_ptr<GravityFun::GameManager> game_manager(new GravityFun::GameManager(window));
     std::vector<std::shared_ptr<GravityFun::Physics>> physics_pass1;
     std::vector<std::shared_ptr<GravityFun::Physics>> physics_pass2; // hybrid pass
-    for (int i = 0; i < hardware_concurrency; i++)
+    auto physics_modules_count = hardware_concurrency;
+    for (int i = 0; i < physics_modules_count; i++)
         physics_pass1.push_back(
             std::shared_ptr<GravityFun::Physics>(
-                new GravityFun::Physics(game_manager, i, hardware_concurrency, false)
+                new GravityFun::Physics(game_manager, i, physics_modules_count, false)
             )
         );
-    for (int i = 0; i < hardware_concurrency; i++)
+    for (int i = 0; i < physics_modules_count; i++)
         physics_pass2.push_back(
             std::shared_ptr<GravityFun::Physics>(
-                new GravityFun::Physics(game_manager, i, hardware_concurrency, true)
+                new GravityFun::Physics(game_manager, i, physics_modules_count, true)
             )
         );
     std::shared_ptr<GravityFun::Renderer> renderer(new GravityFun::Renderer(window, game_manager));
@@ -58,9 +59,10 @@ int main()
     ));
     std::shared_ptr<LoopScheduler::ParallelGroup> physics_and_render_group(new LoopScheduler::ParallelGroup(
         {
-            LoopScheduler::ParallelGroupMember(physics_passes_group, 1),
-            LoopScheduler::ParallelGroupMember(renderer, 0)
-        }
+            LoopScheduler::ParallelGroupMember(renderer, 0),
+            LoopScheduler::ParallelGroupMember(physics_passes_group, 1)
+        },
+        true // To support multiple SequentialGroup runs in ParallelGroup that is in another SequentialGroup
     ));
     std::shared_ptr<LoopScheduler::SequentialGroup> root_group(new LoopScheduler::SequentialGroup(
         std::vector<LoopScheduler::SequentialGroupMember>({
@@ -71,7 +73,7 @@ int main()
 
     LoopScheduler::Loop loop(root_group);
 
-    loop.Run(hardware_concurrency + 1); // TODO: Support multiple SequentialGroup runs in ParallelGroup
+    loop.Run(hardware_concurrency);
 
     return 0;
 }

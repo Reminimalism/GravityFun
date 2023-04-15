@@ -24,11 +24,14 @@
 #include <utility>
 
 #include "Module.h"
+#include "BiasedEMATimeSpanPredictor.h"
 
 namespace LoopScheduler
 {
     SequentialGroup::SequentialGroup(
-            std::vector<SequentialGroupMember> Members
+            std::vector<SequentialGroupMember> Members,
+            std::unique_ptr<TimeSpanPredictor> HigherExecutionTimePredictor,
+            std::unique_ptr<TimeSpanPredictor> LowerExecutionTimePredictor
         ) : Members(Members), CurrentMemberIndex(-1), CurrentMemberRunsCount(0), RunningThreadsCount(0)
     {
         std::vector<std::shared_ptr<Group>> member_groups;
@@ -44,7 +47,41 @@ namespace LoopScheduler
         for (auto& member : Members)
             if (std::holds_alternative<std::shared_ptr<Group>>(member))
                 GroupMembers.push_back(std::get<std::shared_ptr<Group>>(member));
+
+        if (HigherExecutionTimePredictor == nullptr)
+            HigherExecutionTimePredictor = std::unique_ptr<BiasedEMATimeSpanPredictor>(
+                new BiasedEMATimeSpanPredictor(
+                    0,
+                    BiasedEMATimeSpanPredictor::DEFAULT_FAST_ALPHA,
+                    BiasedEMATimeSpanPredictor::DEFAULT_SLOW_ALPHA
+                )
+            );
+        if (LowerExecutionTimePredictor == nullptr)
+            LowerExecutionTimePredictor = std::unique_ptr<BiasedEMATimeSpanPredictor>(
+                new BiasedEMATimeSpanPredictor(
+                    0,
+                    BiasedEMATimeSpanPredictor::DEFAULT_SLOW_ALPHA,
+                    BiasedEMATimeSpanPredictor::DEFAULT_FAST_ALPHA
+                )
+            );
+        this->HigherExecutionTimePredictor = std::move(HigherExecutionTimePredictor);
+        this->LowerExecutionTimePredictor = std::move(LowerExecutionTimePredictor);
     }
+
+    class IncrementGuard
+    {
+    private:
+        int& num;
+    public:
+        IncrementGuard(int& num) : num(num)
+        {
+            num++;
+        }
+        ~IncrementGuard()
+        {
+            num--;
+        }
+    };
 
     class IncrementGuardLockingOnDecrement
     {
@@ -69,6 +106,7 @@ namespace LoopScheduler
         std::unique_lock<std::shared_mutex> lock(MembersSharedMutex);
         if (ShouldIncrementCurrentMemberIndex())
         {
+            TimespanMeasurementStart();
             CurrentMemberIndex++;
             CurrentMemberRunsCount = 0;
         }
@@ -78,18 +116,21 @@ namespace LoopScheduler
             auto token = member->GetRunningToken();
             if (token.CanRun())
             {
-                IncrementGuardLockingOnDecrement increment_guard(RunningThreadsCount, lock);
+                IncrementGuard increment_guard(RunningThreadsCount);
                 CurrentMemberRunsCount++;
                 LastModuleStartTime = std::chrono::steady_clock::now();
                 LastModuleHigherPredictedTimeSpan = member->PredictHigherExecutionTime();
                 LastModuleLowerPredictedTimeSpan = member->PredictLowerExecutionTime();
                 lock.unlock();
                 token.Run();
+                lock.lock(); // Lock for both increment_guard and TimespanMeasurementStop()
             }
             else
             {
                 return false;
             }
+            TimespanMeasurementStop();
+            lock.unlock(); // Unlock after both increment_guard and TimespanMeasurementStop()
             NextEventConditionVariable.notify_all();
             return true;
         }
@@ -97,17 +138,46 @@ namespace LoopScheduler
         {
             bool success = false;
             {
-                IncrementGuardLockingOnDecrement increment_guard(RunningThreadsCount, lock);
+                IncrementGuard increment_guard(RunningThreadsCount);
                 CurrentMemberRunsCount++;
                 auto& member = std::get<std::shared_ptr<Group>>(Members[CurrentMemberIndex]);
                 lock.unlock();
 
                 success = member->RunNext(max_time);
+
+                lock.lock(); // Lock for both increment_guard and TimespanMeasurementStop()
             }
+            TimespanMeasurementStop();
+            lock.unlock(); // Unlock after both increment_guard and TimespanMeasurementStop()
             NextEventConditionVariable.notify_all();
             return success;
         }
         return false;
+    }
+
+    inline void SequentialGroup::TimespanMeasurementStart()
+    {
+        if (CurrentMemberIndex == -1)
+        {
+            IterationStartTime = std::chrono::steady_clock::now();
+        }
+    }
+    inline void SequentialGroup::TimespanMeasurementStop()
+    {
+        if ((CurrentMemberIndex == (int)Members.size() - 1)
+            && (RunningThreadsCount == 0) // Called after increment_guard is destructed => already decremented
+            && (
+                CurrentMemberIndex == -1
+                || (std::holds_alternative<std::shared_ptr<Module>>(Members[CurrentMemberIndex]) ?
+                    (CurrentMemberRunsCount != 0)
+                    : (std::get<std::shared_ptr<Group>>(Members[CurrentMemberIndex])->IsDone()))
+            )) // IsDone
+        {
+            std::chrono::duration<double> duration = std::chrono::steady_clock::now() - IterationStartTime;
+            double time = duration.count();
+            HigherExecutionTimePredictor->ReportObservation(time);
+            LowerExecutionTimePredictor->ReportObservation(time);
+        }
     }
 
     bool SequentialGroup::IsRunAvailable(double MaxEstimatedExecutionTime)
@@ -282,6 +352,17 @@ namespace LoopScheduler
     {
         std::shared_lock<std::shared_mutex> lock(MembersSharedMutex);
         return PredictRemainingExecutionTimeNoLock<false>();
+    }
+
+    double SequentialGroup::PredictHigherExecutionTime()
+    {
+        std::shared_lock<std::shared_mutex> lock(MembersSharedMutex);
+        return HigherExecutionTimePredictor->Predict();
+    }
+    double SequentialGroup::PredictLowerExecutionTime()
+    {
+        std::shared_lock<std::shared_mutex> lock(MembersSharedMutex);
+        return LowerExecutionTimePredictor->Predict();
     }
 
     bool SequentialGroup::UpdateLoop(Loop * LoopPtr)
