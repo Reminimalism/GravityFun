@@ -59,7 +59,7 @@ namespace GravityFun
         /// @brief Used for physics.
         static constexpr double DOWN_GRAVITY_ACCELERATION = 1;
         /// @brief Used for physics.
-        static constexpr double MASS_GRAVITY_ACCELERATION = 0.05;
+        static constexpr double MASS_GRAVITY_ACCELERATION = 0.02;
         /// @brief Used for physics.
         static constexpr double MOUSE_GRAVITY_ACCELERATION = 0.1;
         /// @brief Used for physics.
