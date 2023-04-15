@@ -95,6 +95,7 @@ namespace GravityFun
             Circle.Render();
         }
 
+        auto token = StartIdling(0, PredictLowerExecutionTime());
         _Window->SwapBuffers();
     }
 
