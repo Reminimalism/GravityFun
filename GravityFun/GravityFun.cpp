@@ -11,6 +11,7 @@ int main()
     std::cout << GravityFun::Info::DEPENDENCIES << '\n';
     std::cout << GravityFun::Info::NAME << " v" << GravityFun::Info::VERSION << "\n";
     std::cout << GravityFun::Info::LICENSE << '\n';
+    std::cout << GravityFun::Info::DESCRIPTION << '\n';
 
     auto hardware_concurrency = std::thread::hardware_concurrency();
 
