@@ -134,12 +134,12 @@ namespace GravityFun
                 }
                 // Velocity
                 write_buffer[i].Velocity = read_buffer[i].Velocity + net_acceleration * time_diff;
-                // Braking (velocity)
+                // Braking (applied to velocity)
                 if (braking)
                 {
                     if (write_buffer[i].Velocity.x != 0)
                     {
-                        double x = std::abs(write_buffer[i].Velocity.x) - GameManager::MOUSE_BRAKING_ACCELERATION;
+                        double x = std::abs(write_buffer[i].Velocity.x) - GameManager::MOUSE_BRAKING_ACCELERATION * time_diff;
                         if (x <= 0)
                             write_buffer[i].Velocity.x = 0;
                         else
@@ -147,7 +147,7 @@ namespace GravityFun
                     }
                     if (write_buffer[i].Velocity.y != 0)
                     {
-                        double y = std::abs(write_buffer[i].Velocity.y) - GameManager::MOUSE_BRAKING_ACCELERATION;
+                        double y = std::abs(write_buffer[i].Velocity.y) - GameManager::MOUSE_BRAKING_ACCELERATION * time_diff;
                         if (y <= 0)
                             write_buffer[i].Velocity.y = 0;
                         else
