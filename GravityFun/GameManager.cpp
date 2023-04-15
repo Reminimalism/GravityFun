@@ -63,16 +63,22 @@ namespace GravityFun
         if (_Window->GetPressedKeys().contains(GLFW_KEY_UP)
             || _Window->GetRepeatedKeys().contains(GLFW_KEY_UP))
         {
-            auto temp = ObjectsCount + 1;
-            if (temp <= MAX_OBJECTS_COUNT)
-                ObjectsCount = temp;
+            for (int i = 0; i < ObjectsCount / 11 + 1; i++)
+            {
+                auto temp = ObjectsCount + 1;
+                if (temp <= MAX_OBJECTS_COUNT)
+                    ObjectsCount = temp;
+            }
         }
         if (_Window->GetPressedKeys().contains(GLFW_KEY_DOWN)
             || _Window->GetRepeatedKeys().contains(GLFW_KEY_DOWN))
         {
-            auto temp = ObjectsCount - 1;
-            if (MIN_OBJECTS_COUNT <= temp)
-                ObjectsCount = temp;
+            for (int i = 0; i < ObjectsCount / 11 + 1; i++)
+            {
+                auto temp = ObjectsCount - 1;
+                if (MIN_OBJECTS_COUNT <= temp)
+                    ObjectsCount = temp;
+            }
         }
 
         // Update buffers based on objects count
