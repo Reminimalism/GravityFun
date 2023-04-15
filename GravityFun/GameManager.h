@@ -42,7 +42,7 @@ namespace GravityFun
 
         static constexpr int DEFAULT_OBJECTS_COUNT = 10;
         static constexpr int MIN_OBJECTS_COUNT = 0;
-        static constexpr int MAX_OBJECTS_COUNT = 100;
+        static constexpr int MAX_OBJECTS_COUNT = 1000;
         static constexpr double DEFAULT_MASS = 1;
         static constexpr double MIN_MASS = 0.5;
         static constexpr double MAX_MASS = 2;
@@ -53,10 +53,19 @@ namespace GravityFun
         static constexpr double MAX_TIME_MULTIPLIER = 8;
 
         /// @brief Used for physics. See also: COLLISION_PRESERVE
-        static constexpr double COLLISION_LOSS = 0.1;
+        static constexpr double COLLISION_LOSS = 0.2;
         /// @brief Used for physics. COLLISION_PRESERVE = 1 - COLLISION_LOSS
         static constexpr double COLLISION_PRESERVE = 1 - COLLISION_LOSS;
+        /// @brief Used for physics.
         static constexpr double DOWN_GRAVITY_ACCELERATION = 1;
+        /// @brief Used for physics.
+        static constexpr double MASS_GRAVITY_ACCELERATION = 0.05;
+        /// @brief Used for physics.
+        static constexpr double MOUSE_GRAVITY_ACCELERATION = 0.1;
+        /// @brief Used for physics.
+        static constexpr double MOUSE_BRAKING_ACCELERATION = 1;
+        /// @brief Used for physics.
+        static constexpr double MAX_TIME_DIFF = 0.1;
 
         int GetObjectsCount();
         double GetTimeMultiplier();
@@ -70,6 +79,11 @@ namespace GravityFun
         /// @brief Width / Height
         double GetAspectRatio();
         // double GetComputationIntensity(); // TODO ?
+        double GetMousePositionX();
+        double GetMousePositionY();
+        bool IsMousePulling();
+        bool IsMousePushing();
+        bool IsMouseBraking();
     protected:
         virtual void OnRun() override;
     private:
@@ -99,6 +113,11 @@ namespace GravityFun
         double BorderY;
         /// @brief Width / Height
         double AspectRatio;
+        double MouseX;
+        double MouseY;
+        bool MouseLeft;
+        bool MouseRight;
+        bool MouseMiddle;
 
         void PhysicsPassNotify();
     };

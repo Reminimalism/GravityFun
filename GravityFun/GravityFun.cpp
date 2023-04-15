@@ -24,13 +24,13 @@ int main()
     for (int i = 0; i < physics_modules_count; i++)
         physics_pass1.push_back(
             std::shared_ptr<GravityFun::Physics>(
-                new GravityFun::Physics(game_manager, i, physics_modules_count, false)
+                new GravityFun::Physics(game_manager, i, physics_modules_count, nullptr)
             )
         );
     for (int i = 0; i < physics_modules_count; i++)
         physics_pass2.push_back(
             std::shared_ptr<GravityFun::Physics>(
-                new GravityFun::Physics(game_manager, i, physics_modules_count, true)
+                new GravityFun::Physics(game_manager, i, physics_modules_count, physics_pass1[i].get())
             )
         );
     std::shared_ptr<GravityFun::Renderer> renderer(new GravityFun::Renderer(window, game_manager));

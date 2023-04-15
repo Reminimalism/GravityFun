@@ -127,6 +127,13 @@ namespace GravityFun
         AspectRatio = (double)width / height;
         BorderX = AspectRatio;
         BorderY = 1;
+
+        auto [mouse_xi, mouse_yi] = _Window->GetMousePosition();
+        MouseX = BorderX * (2 * (double)mouse_xi / width - 1);
+        MouseY = BorderY * (-2 * (double)mouse_yi / height + 1);
+        MouseLeft = _Window->GetMouseLeftButton();
+        MouseRight = _Window->GetMouseRightButton();
+        MouseMiddle = _Window->GetMouseMiddleButton();
     }
 
     void GameManager::PhysicsPassNotify()
@@ -200,4 +207,9 @@ namespace GravityFun
     {
         return AspectRatio;
     }
+    double GameManager::GetMousePositionX() { return MouseX; }
+    double GameManager::GetMousePositionY() { return MouseY; }
+    bool GameManager::IsMousePulling() { return MouseLeft; }
+    bool GameManager::IsMousePushing() { return MouseRight; }
+    bool GameManager::IsMouseBraking() { return MouseMiddle; }
 }
