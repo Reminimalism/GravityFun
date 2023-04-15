@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <numbers>
+#include <random>
 
 #include "BufferGeneration.h"
 #include "Shaders.h"
@@ -81,9 +82,18 @@ namespace GravityFun
         //...
 
         // Objects
-        for (const auto& item : _GameManager->GetRenderBuffer())
+        const auto& buffer = _GameManager->GetRenderBuffer();
+        for (int i = 0; i < buffer.size(); i++)
         {
-            glUniform3f(ProgramColorUniform, 1, 1, 1);
+            const auto& item = buffer[i];
+            std::uniform_real_distribution<double> distribution(0.5, 1.0);
+            std::mt19937 mt(i * 3 + 0);
+            double r = distribution(mt);
+            mt.seed(i * 3 + 1);
+            double g = distribution(mt);
+            mt.seed(i * 3 + 2);
+            double b = distribution(mt);
+            glUniform3f(ProgramColorUniform, r, g, b);
             auto model_matrix =
                 Math::Matrix4x4::Translation(item.Position.x, item.Position.y, 0)
                 * Math::Matrix4x4::Scale(
