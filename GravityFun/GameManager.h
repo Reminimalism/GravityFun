@@ -6,6 +6,7 @@
 #include "FloatingObject.h"
 
 #include <memory>
+#include <thread>
 #include <vector>
 
 namespace GravityFun
@@ -86,9 +87,12 @@ namespace GravityFun
         bool IsMouseBraking();
     protected:
         virtual void OnRun() override;
+        virtual bool CanRun() override;
     private:
         std::shared_ptr<Window> _Window;
         std::shared_ptr<PhysicsPassNotifier> _PhysicsPassNotifier;
+
+        std::thread::id MainThreadId;
 
         Random _Random;
 

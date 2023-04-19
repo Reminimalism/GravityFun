@@ -10,6 +10,7 @@
 
 #include <map>
 #include <memory>
+#include <thread>
 
 namespace GravityFun
 {
@@ -25,9 +26,12 @@ namespace GravityFun
         Renderer& operator=(Renderer&&) = delete;
     protected:
         virtual void OnRun() override;
+        virtual bool CanRun() override;
     private:
         std::shared_ptr<Window> _Window;
         std::shared_ptr<GameManager> _GameManager;
+
+        std::thread::id MainThreadId;
 
         Model Circle;
 

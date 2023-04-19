@@ -13,14 +13,15 @@ namespace GravityFun
     }
 
     GameManager::GameManager(std::shared_ptr<Window> window)
-        : _Window(window), _PhysicsPassNotifier(new PhysicsPassNotifier(this)),
+        : _Window(window), _PhysicsPassNotifier(new PhysicsPassNotifier(this)), MainThreadId(std::this_thread::get_id()),
           ObjectsCount(DEFAULT_OBJECTS_COUNT), TimeMultiplier(DEFAULT_TIME_MULTIPLIER),
           DownGravityOn(false), RelativeGravityOn(false),
           VariableMassOn(false),
           BorderCollisionOn(true), ObjectCollisionOn(false),
           BorderX(1), BorderY(1),
           RenderBufferIndex(0),
-          PhysicsPass1ReadBufferIndex(0), PhysicsPass2WriteBufferIndex(2)
+          PhysicsPass1ReadBufferIndex(0), PhysicsPass2WriteBufferIndex(2),
+          LoopScheduler::Module(false, nullptr, nullptr, true)
     {
         for (int i = 0; i < 3; i++)
         {
@@ -36,6 +37,11 @@ namespace GravityFun
                 );
             }
         }
+    }
+
+    bool GameManager::CanRun()
+    {
+        return std::this_thread::get_id() == MainThreadId;
     }
 
     void GameManager::OnRun()

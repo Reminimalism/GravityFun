@@ -19,9 +19,10 @@ constexpr float BUTTON_ICON_Z = 0.05f;
 namespace GravityFun
 {
     Renderer::Renderer(std::shared_ptr<Window> window, std::shared_ptr<GameManager> game_manager)
-        : _Window(window), _GameManager(game_manager),
+        : _Window(window), _GameManager(game_manager), MainThreadId(std::this_thread::get_id()),
           Program(SimpleVertexShaderSource, SimpleFragmentShaderSource),
-          Circle(BufferGeneration::GenerateCircle(CIRCLE_RESOLUTION))
+          Circle(BufferGeneration::GenerateCircle(CIRCLE_RESOLUTION)),
+          LoopScheduler::Module(false, nullptr, nullptr, true)
     {
         ProgramModelUniform = Program.GetUniformLocation("Model");
         ProgramViewUniform = Program.GetUniformLocation("View");
@@ -33,6 +34,11 @@ namespace GravityFun
 
     Renderer::~Renderer()
     {
+    }
+
+    bool Renderer::CanRun()
+    {
+        return std::this_thread::get_id() == MainThreadId;
     }
 
     float smoothstep(float t)
