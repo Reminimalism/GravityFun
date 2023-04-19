@@ -44,7 +44,7 @@ After building, the executable file can be found in `GravityFun/Build/GravityFun
 ## Building on Windows
 
 The easiest option is to open the project folder directly in the latest Visual Studio if you have its own CMake tools installed.
-The build configuration can be changed using the configuration menu (usually x64-Debug by default, release configuration is recommended) and the project can be built using Build > Build All.
+The build configuration can be changed using the configuration menu (usually x64-Debug by default). The "Release" configuration is recommended, "RelWithDebInfo" or any other configuration is not recommended. The project can be built using Build > Build All.
 
 Alternatively, download and install CMake from [their website](https://cmake.org/download/).
 Download and extract this repository from the "Code" menu > Download Zip.
