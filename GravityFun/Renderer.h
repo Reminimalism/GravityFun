@@ -4,13 +4,16 @@
 
 #include "Math.h"
 #include "Model.h"
+#include "AnimatedModel.h"
 #include "ShaderProgram.h"
 
 #include "../glad/include/glad/glad.h"
 
+#include <chrono>
 #include <map>
 #include <memory>
 #include <thread>
+#include <vector>
 
 namespace GravityFun
 {
@@ -34,6 +37,12 @@ namespace GravityFun
         std::thread::id MainThreadId;
 
         Model Circle;
+        AnimatedModel DownGravityToggle;
+        std::vector<AnimatedModel*> AnimatedModels;
+        std::map<AnimatedModel*, float> AnimatedModelsToT;
+        struct Animation { public: float s, e, t; };
+        std::map<AnimatedModel*, Animation> ActiveToggleAnimations;
+        std::chrono::steady_clock::time_point LastTime;
 
         ShaderProgram Program;
         GLint ProgramModelUniform;

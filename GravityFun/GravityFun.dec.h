@@ -41,6 +41,7 @@ Physics uses GameManager
 Renderer contains
     ShaderProgram
     Model
+    AnimatedModel
 
 */
 

@@ -25,9 +25,21 @@ namespace GravityFun::BufferGeneration
     /// @param arrow_head_height The height of the arrow head.
     /// @return Vertices of vec3 position and vec3 normal, and triangles' indices.
     ///         Normal is (0, 0, 1) in all vertices.
-    std::tuple<std::vector<float>, std::vector<unsigned int>> GenerateExitIcon(float z = 0.1,
-                                                                               float line_offset = 0.5,
-                                                                               float line_thickness = 0.1,
-                                                                               float arrow_head_width = 0.3,
-                                                                               float arrow_head_height = 0.3);
+    std::tuple<std::vector<float>, std::vector<unsigned int>> GenerateExitIcon(
+        float z = 0.1,
+        float line_offset = 0.5,
+        float line_thickness = 0.1,
+        float arrow_head_width = 0.3,
+        float arrow_head_height = 0.3
+    );
+
+    /// @param circle_resolution The number of vertices around the circle. The minimum is 8.
+    /// @param z The z of vertices.
+    /// @return 2 vertex lists of vec3 position and vec3 normal, for 2 states, and triangles' indices.
+    ///           Normal is (0, 0, 1) in all vertices.
+    ///           Position xy is in range [-1, 1].
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateDownGravityToggle(
+        int circle_resolution,
+        float z = 0.1
+    );
 }

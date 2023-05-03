@@ -59,4 +59,17 @@ namespace GravityFun
         glBindVertexArray(VertexArray);
         glDrawElements(GL_TRIANGLES, Indices.size(), GL_UNSIGNED_INT, 0);
     }
+
+    void Model::UpdateVertices()
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, VerticesBuffer);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            Vertices.size() * sizeof(decltype(Vertices)::value_type),
+            Vertices.data(),
+            GL_STATIC_DRAW
+        );
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 }

@@ -9,13 +9,13 @@
 
 namespace GravityFun
 {
-    class Model final
+    class Model
     {
     public:
         /// @param vertices Contains positions and normals.
         Model(std::vector<float> vertices, std::vector<unsigned int> indices);
         Model(std::tuple<std::vector<float>, std::vector<unsigned int>> buffers);
-        ~Model();
+        virtual ~Model();
 
         void Render();
 
@@ -23,9 +23,11 @@ namespace GravityFun
         Model(Model&&) = delete;
         Model& operator=(const Model&) = delete;
         Model& operator=(Model&&) = delete;
-    private:
+    protected:
         std::vector<float> Vertices;
         std::vector<unsigned int> Indices;
+        void UpdateVertices();
+    private:
         GLuint VerticesBuffer;
         GLuint IndicesBuffer;
         GLuint VertexArray;

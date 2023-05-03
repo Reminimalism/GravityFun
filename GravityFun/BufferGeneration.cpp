@@ -3,6 +3,8 @@
 #include <cmath>
 #include <numbers>
 
+#include "Math.h"
+
 namespace GravityFun::BufferGeneration
 {
     std::tuple<std::vector<float>, std::vector<unsigned int>> GenerateCircle(int circle_resolution)
@@ -463,5 +465,302 @@ namespace GravityFun::BufferGeneration
         indices.push_back(14);
 
         return std::make_tuple(vertices, indices);
+    }
+
+    inline void generate_animated_circle(
+            int& next_index,
+            std::vector<float>& vertices0,
+            std::vector<float>& vertices1,
+            std::vector<unsigned int>& indices,
+            float z,
+            int circle_resolution,
+            float center0x,
+            float center0y,
+            float radius0,
+            float center1x,
+            float center1y,
+            float radius1
+        )
+    {
+        // next_index + 0
+        // center
+        vertices0.push_back(center0x); // position
+        vertices0.push_back(center0y);
+        vertices0.push_back(z);
+        vertices0.push_back(0); // normal
+        vertices0.push_back(0);
+        vertices0.push_back(1);
+        vertices1.push_back(center1x); // position
+        vertices1.push_back(center1y);
+        vertices1.push_back(z);
+        vertices1.push_back(0); // normal
+        vertices1.push_back(0);
+        vertices1.push_back(1);
+
+        // next_index + 1
+        // circle start
+        vertices0.push_back(center0x + radius0);
+        vertices0.push_back(center0y);
+        vertices0.push_back(z);
+        vertices0.push_back(0);
+        vertices0.push_back(0);
+        vertices0.push_back(1);
+        vertices1.push_back(center1x + radius1);
+        vertices1.push_back(center1y);
+        vertices1.push_back(z);
+        vertices1.push_back(0);
+        vertices1.push_back(0);
+        vertices1.push_back(1);
+
+        int center_index = next_index + 0;
+
+        for (int i = 1; i < circle_resolution; i++)
+        {
+            double t = (2 * std::numbers::pi) * ((double)i/(double)circle_resolution);
+            float x = (float)std::cos(t);
+            float y = (float)std::sin(t);
+
+            // i + 1
+            vertices0.push_back(center0x + x * radius0);
+            vertices0.push_back(center0y + y * radius0);
+            vertices0.push_back(z);
+            vertices0.push_back(0);
+            vertices0.push_back(0);
+            vertices0.push_back(1);
+            vertices1.push_back(center1x + x * radius1);
+            vertices1.push_back(center1y + y * radius1);
+            vertices1.push_back(z);
+            vertices1.push_back(0);
+            vertices1.push_back(0);
+            vertices1.push_back(1);
+
+            int current_index = next_index + i + 1;
+            int previous_index = next_index + i;
+
+            indices.push_back(center_index);
+            indices.push_back(previous_index);
+            indices.push_back(current_index);
+        }
+
+        int first_index = next_index + 1;
+        int last_index = next_index + circle_resolution;
+
+        indices.push_back(center_index);
+        indices.push_back(last_index);
+        indices.push_back(first_index);
+
+        next_index = last_index + 1;
+    }
+
+    inline void generate_animated_arrow(
+            int& next_index,
+            std::vector<float>& vertices0,
+            std::vector<float>& vertices1,
+            std::vector<unsigned int>& indices,
+            float z,
+            Math::Vec2 tailpos0,
+            Math::Vec2 headpos0,
+            float tailsize0,
+            Math::Vec2 headsize0,
+            Math::Vec2 tailpos1,
+            Math::Vec2 headpos1,
+            float tailsize1,
+            Math::Vec2 headsize1
+        )
+    {
+        Math::Vec2 diff0 = headpos0 - tailpos0;
+        Math::Vec2 diff1 = headpos1 - tailpos1;
+        Math::Vec2 direction0 = diff0.GetNormalized();
+        Math::Vec2 direction1 = diff1.GetNormalized();
+        float length0 = (headpos0 - tailpos0).GetMagnitude();
+        float length1 = (headpos1 - tailpos1).GetMagnitude();
+        float taillength0 = length0 - headsize0.y;
+        float taillength1 = length1 - headsize1.y;
+
+        Math::Vec2 left0 = Math::Vec2(-direction0.y, direction0.x).GetNormalized();
+        Math::Vec2 right0 = Math::Vec2(direction0.y, -direction0.x).GetNormalized();
+        Math::Vec2 left1 = Math::Vec2(-direction1.y, direction1.x).GetNormalized();
+        Math::Vec2 right1 = Math::Vec2(direction1.y, -direction1.x).GetNormalized();
+
+        Math::Vec2 v0 = tailpos0 + left0 * tailsize0;
+        Math::Vec2 v1 = tailpos1 + left1 * tailsize1;
+
+        // arrow tail
+
+        // next_index + 0
+        vertices0.push_back(v0.x); // position
+        vertices0.push_back(v0.y);
+        vertices0.push_back(z);
+        vertices0.push_back(0); // normal
+        vertices0.push_back(0);
+        vertices0.push_back(1);
+        vertices1.push_back(v1.x); // position
+        vertices1.push_back(v1.y);
+        vertices1.push_back(z);
+        vertices1.push_back(0); // normal
+        vertices1.push_back(0);
+        vertices1.push_back(1);
+
+        v0 = tailpos0 + right0 * tailsize0;
+        v1 = tailpos1 + right1 * tailsize1;
+
+        // next_index + 1
+        vertices0.push_back(v0.x);
+        vertices0.push_back(v0.y);
+        vertices0.push_back(z);
+        vertices0.push_back(0);
+        vertices0.push_back(0);
+        vertices0.push_back(1);
+        vertices1.push_back(v1.x);
+        vertices1.push_back(v1.y);
+        vertices1.push_back(z);
+        vertices1.push_back(0);
+        vertices1.push_back(0);
+        vertices1.push_back(1);
+
+        v0 = tailpos0 + (direction0 * taillength0) + right0 * tailsize0;
+        v1 = tailpos1 + (direction1 * taillength1) + right1 * tailsize1;
+
+        // next_index + 2
+        vertices0.push_back(v0.x);
+        vertices0.push_back(v0.y);
+        vertices0.push_back(z);
+        vertices0.push_back(0);
+        vertices0.push_back(0);
+        vertices0.push_back(1);
+        vertices1.push_back(v1.x);
+        vertices1.push_back(v1.y);
+        vertices1.push_back(z);
+        vertices1.push_back(0);
+        vertices1.push_back(0);
+        vertices1.push_back(1);
+
+        v0 = tailpos0 + (direction0 * taillength0) + left0 * tailsize0;
+        v1 = tailpos1 + (direction1 * taillength1) + left1 * tailsize1;
+
+        // next_index + 3
+        vertices0.push_back(v0.x);
+        vertices0.push_back(v0.y);
+        vertices0.push_back(z);
+        vertices0.push_back(0);
+        vertices0.push_back(0);
+        vertices0.push_back(1);
+        vertices1.push_back(v1.x);
+        vertices1.push_back(v1.y);
+        vertices1.push_back(z);
+        vertices1.push_back(0);
+        vertices1.push_back(0);
+        vertices1.push_back(1);
+
+        indices.push_back(next_index + 0);
+        indices.push_back(next_index + 1);
+        indices.push_back(next_index + 2);
+
+        indices.push_back(next_index + 0);
+        indices.push_back(next_index + 2);
+        indices.push_back(next_index + 3);
+
+        next_index += 4;
+
+        // arrow head
+
+        v0 = tailpos0 + (direction0 * taillength0) + left0 * headsize0.x;
+        v1 = tailpos1 + (direction1 * taillength1) + left1 * headsize1.x;
+
+        // next_index + 0
+        vertices0.push_back(v0.x);
+        vertices0.push_back(v0.y);
+        vertices0.push_back(z);
+        vertices0.push_back(0);
+        vertices0.push_back(0);
+        vertices0.push_back(1);
+        vertices1.push_back(v1.x);
+        vertices1.push_back(v1.y);
+        vertices1.push_back(z);
+        vertices1.push_back(0);
+        vertices1.push_back(0);
+        vertices1.push_back(1);
+
+        v0 = tailpos0 + (direction0 * taillength0) + right0 * headsize0.x;
+        v1 = tailpos1 + (direction1 * taillength1) + right1 * headsize1.x;
+
+        // next_index + 1
+        vertices0.push_back(v0.x);
+        vertices0.push_back(v0.y);
+        vertices0.push_back(z);
+        vertices0.push_back(0);
+        vertices0.push_back(0);
+        vertices0.push_back(1);
+        vertices1.push_back(v1.x);
+        vertices1.push_back(v1.y);
+        vertices1.push_back(z);
+        vertices1.push_back(0);
+        vertices1.push_back(0);
+        vertices1.push_back(1);
+
+        // next_index + 2
+        vertices0.push_back(headpos0.x);
+        vertices0.push_back(headpos0.y);
+        vertices0.push_back(z);
+        vertices0.push_back(0);
+        vertices0.push_back(0);
+        vertices0.push_back(1);
+        vertices1.push_back(headpos1.x);
+        vertices1.push_back(headpos1.y);
+        vertices1.push_back(z);
+        vertices1.push_back(0);
+        vertices1.push_back(0);
+        vertices1.push_back(1);
+
+        indices.push_back(next_index + 0);
+        indices.push_back(next_index + 1);
+        indices.push_back(next_index + 2);
+
+        next_index += 3;
+    }
+
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateDownGravityToggle(int circle_resolution, float z)
+    {
+        if (circle_resolution < 8)
+            circle_resolution = 8;
+
+        constexpr float off_state_circle_center_y = 0;
+        constexpr float off_state_circle_size = 0.75;
+        constexpr float on_state_circle_center_y = 0.5;
+        constexpr float on_state_circle_size = 0.5;
+        constexpr float arrow_size = 0.1;
+        constexpr float arrow_head_size_x = 0.4;
+        constexpr float arrow_start_y = 0.5;
+        constexpr float arrow_head_start_y = -0.5;
+        constexpr float arrow_head_size_y = 0.5;
+
+        std::vector<float> vertices0;
+        std::vector<float> vertices1;
+        std::vector<unsigned int> indices;
+
+        int next_index = 0;
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z, circle_resolution,
+            0, off_state_circle_center_y, off_state_circle_size,
+            0, on_state_circle_center_y, on_state_circle_size
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(0, 0), Math::Vec2(0, -arrow_head_size_y),
+            arrow_size, Math::Vec2(arrow_head_size_x / 2, arrow_head_size_y / 2),
+            Math::Vec2(0, arrow_start_y), Math::Vec2(0, arrow_head_start_y - arrow_head_size_y),
+            arrow_size, Math::Vec2(arrow_head_size_x, arrow_head_size_y)
+        );
+
+        return std::make_tuple(vertices0, vertices1, indices);
     }
 }

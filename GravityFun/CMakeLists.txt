@@ -10,6 +10,7 @@ if (WIN32)
 endif()
 
 add_executable(GravityFun
+    AnimatedModel.cpp
     BufferGeneration.cpp
     FloatingObject.cpp
     GameManager.cpp

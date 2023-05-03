@@ -12,9 +12,12 @@
 constexpr int CIRCLE_RESOLUTION = 80;
 
 constexpr int ROUNDED_SQUARE_CORNER_RESOLUTION = 20;
-constexpr float ROUNDED_SQUARE_CORNER_RADIUS = 0.5f;
+constexpr float ROUNDED_SQUARE_CORNER_RADIUS = 0.5;
 
-constexpr float BUTTON_ICON_Z = 0.05f;
+constexpr float HINT_ICON_Z = 0.05;
+constexpr float HINT_ICON_SIZE = 0.03;
+constexpr float HINT_ICON_PADDING = 0.01;
+constexpr float HINT_ICON_ANIMATION_SPEED = 2;
 
 namespace GravityFun
 {
@@ -22,12 +25,17 @@ namespace GravityFun
         : _Window(window), _GameManager(game_manager), MainThreadId(std::this_thread::get_id()),
           Program(SimpleVertexShaderSource, SimpleFragmentShaderSource),
           Circle(BufferGeneration::GenerateCircle(CIRCLE_RESOLUTION)),
+          DownGravityToggle(BufferGeneration::GenerateDownGravityToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
+          LastTime(std::chrono::steady_clock::now()),
           LoopScheduler::Module(false, nullptr, nullptr, true)
     {
         ProgramModelUniform = Program.GetUniformLocation("Model");
         ProgramViewUniform = Program.GetUniformLocation("View");
         ProgramProjectionUniform = Program.GetUniformLocation("Projection");
         ProgramColorUniform = Program.GetUniformLocation("Color");
+
+        AnimatedModels.push_back(&DownGravityToggle);
+        AnimatedModelsToT[&DownGravityToggle] = _GameManager->IsDownGravityOn() ? 1 : 0;
 
         glEnable(GL_DEPTH_TEST);
     }
@@ -79,15 +87,68 @@ namespace GravityFun
         glUniformMatrix4fv(ProgramViewUniform, 1, GL_FALSE, ViewMatrix.GetData());
         glUniformMatrix4fv(ProgramProjectionUniform, 1, GL_FALSE, ProjectionMatrix.GetData());
 
-        // Hints // TODO
-        //glUniform3f(ProgramColorUniform, 1, 1, 1);
-        //glUniformMatrix4fv(ProgramModelUniform, 1, GL_FALSE, HintModelMatrix.GetData());
-        //Hint.Render();
-        //glUniformMatrix4fv(ProgramModelUniform, 1, GL_FALSE, HintModelMatrix.GetData());
-        //Hint.Render();
-        //...
+        // Update hints
+        float temp = _GameManager->IsDownGravityOn() ? 1 : 0;
+        if (
+                temp != AnimatedModelsToT[&DownGravityToggle]
+                && (
+                    !ActiveToggleAnimations.contains(&DownGravityToggle)
+                    || temp != ActiveToggleAnimations[&DownGravityToggle].e
+                )
+            )
+            ActiveToggleAnimations[&DownGravityToggle] = Animation{
+                AnimatedModelsToT[&DownGravityToggle],
+                temp,
+                0
+            };
 
-        // Objects
+        // Update time
+        auto now = std::chrono::steady_clock::now();
+        std::chrono::duration<float> time_diff_d = now - LastTime;
+        float time_diff = time_diff_d.count();
+        LastTime = now;
+        if (time_diff > GameManager::MAX_TIME_DIFF)
+            time_diff = GameManager::MAX_TIME_DIFF;
+        float t_diff = time_diff * HINT_ICON_ANIMATION_SPEED;
+
+        // Update animations
+        std::vector<AnimatedModel*> animations_to_remove;
+        for (auto& item : ActiveToggleAnimations)
+        {
+            item.second.t += t_diff;
+            if (item.second.t >= 1)
+            {
+                AnimatedModelsToT[item.first] = item.second.e;
+                animations_to_remove.push_back(item.first);
+            }
+            else
+            {
+                AnimatedModelsToT[item.first] = item.second.s + (item.second.e - item.second.s) * smoothstep(item.second.t);
+            }
+        }
+        for (auto& item : animations_to_remove)
+            ActiveToggleAnimations.erase(item);
+
+        // Render hints
+        glUniform3f(ProgramColorUniform, 1, 1, 1);
+        float start = -(HINT_ICON_SIZE + HINT_ICON_PADDING) * (AnimatedModels.size() - 1);
+        for (int i = 0; i < AnimatedModels.size(); i++)
+        {
+            auto model = AnimatedModels[i];
+            auto t = AnimatedModelsToT[model];
+            auto model_matrix =
+                Math::Matrix4x4::Translation(start + i * (HINT_ICON_SIZE + HINT_ICON_PADDING) * 2, 1 - HINT_ICON_SIZE - HINT_ICON_PADDING, 0)
+                * Math::Matrix4x4::Scale(
+                    HINT_ICON_SIZE,
+                    HINT_ICON_SIZE,
+                    1
+                );
+            glUniformMatrix4fv(ProgramModelUniform, 1, GL_FALSE, model_matrix.GetData());
+            model->Update(t);
+            model->Render();
+        }
+
+        // Render objects
         const auto& buffer = _GameManager->GetRenderBuffer();
         for (int i = 0; i < buffer.size(); i++)
         {
