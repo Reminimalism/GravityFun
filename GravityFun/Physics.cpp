@@ -159,24 +159,26 @@ namespace GravityFun
                 // Handle out of borders position
                 if (col) // Border collision => bounce
                 {
-                    if (write_buffer[i].Position.x < -bx)
+                    double local_bx = bx - read_buffer[i].Mass * GameManager::MASS_TO_RADIUS;
+                    double local_by = by - read_buffer[i].Mass * GameManager::MASS_TO_RADIUS;
+                    if (write_buffer[i].Position.x < -local_bx)
                     {
-                        write_buffer[i].Position.x = -bx + (-bx - write_buffer[i].Position.x);
+                        write_buffer[i].Position.x = -local_bx + (-local_bx - write_buffer[i].Position.x);
                         write_buffer[i].Velocity.x = -write_buffer[i].Velocity.x * GameManager::COLLISION_PRESERVE;
                     }
-                    if (write_buffer[i].Position.x > bx)
+                    if (write_buffer[i].Position.x > local_bx)
                     {
-                        write_buffer[i].Position.x = bx + (bx - write_buffer[i].Position.x);
+                        write_buffer[i].Position.x = local_bx + (local_bx - write_buffer[i].Position.x);
                         write_buffer[i].Velocity.x = -write_buffer[i].Velocity.x * GameManager::COLLISION_PRESERVE;
                     }
-                    if (write_buffer[i].Position.y < -by)
+                    if (write_buffer[i].Position.y < -local_by)
                     {
-                        write_buffer[i].Position.y = -by + (-by - write_buffer[i].Position.y);
+                        write_buffer[i].Position.y = -local_by + (-local_by - write_buffer[i].Position.y);
                         write_buffer[i].Velocity.y = -write_buffer[i].Velocity.y * GameManager::COLLISION_PRESERVE;
                     }
-                    if (write_buffer[i].Position.y > by)
+                    if (write_buffer[i].Position.y > local_by)
                     {
-                        write_buffer[i].Position.y = by + (by - write_buffer[i].Position.y);
+                        write_buffer[i].Position.y = local_by + (local_by - write_buffer[i].Position.y);
                         write_buffer[i].Velocity.y = -write_buffer[i].Velocity.y * GameManager::COLLISION_PRESERVE;
                     }
                 }
