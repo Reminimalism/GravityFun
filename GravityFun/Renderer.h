@@ -39,7 +39,6 @@ namespace GravityFun
         Model Circle;
         AnimatedModel DownGravityToggle;
         std::vector<AnimatedModel*> AnimatedModels;
-        std::map<AnimatedModel*, float> AnimatedModelsToT;
         struct Animation { public: float s, e, t; };
         std::map<AnimatedModel*, Animation> ActiveToggleAnimations;
         std::chrono::steady_clock::time_point LastTime;

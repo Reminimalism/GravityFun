@@ -35,7 +35,7 @@ namespace GravityFun
         ProgramColorUniform = Program.GetUniformLocation("Color");
 
         AnimatedModels.push_back(&DownGravityToggle);
-        AnimatedModelsToT[&DownGravityToggle] = _GameManager->IsDownGravityOn() ? 1 : 0;
+        DownGravityToggle.SetState(_GameManager->IsDownGravityOn() ? 1 : 0);
 
         glEnable(GL_DEPTH_TEST);
     }
@@ -90,14 +90,14 @@ namespace GravityFun
         // Update hints
         float temp = _GameManager->IsDownGravityOn() ? 1 : 0;
         if (
-                temp != AnimatedModelsToT[&DownGravityToggle]
+                temp != DownGravityToggle.GetState()
                 && (
                     !ActiveToggleAnimations.contains(&DownGravityToggle)
                     || temp != ActiveToggleAnimations[&DownGravityToggle].e
                 )
             )
             ActiveToggleAnimations[&DownGravityToggle] = Animation{
-                AnimatedModelsToT[&DownGravityToggle],
+                DownGravityToggle.GetState(),
                 temp,
                 0
             };
@@ -118,12 +118,16 @@ namespace GravityFun
             item.second.t += t_diff;
             if (item.second.t >= 1)
             {
-                AnimatedModelsToT[item.first] = item.second.e;
+                item.first->SetState(
+                    item.second.e
+                );
                 animations_to_remove.push_back(item.first);
             }
             else
             {
-                AnimatedModelsToT[item.first] = item.second.s + (item.second.e - item.second.s) * smoothstep(item.second.t);
+                item.first->SetState(
+                    item.second.s + (item.second.e - item.second.s) * smoothstep(item.second.t)
+                );
             }
         }
         for (auto& item : animations_to_remove)
@@ -135,7 +139,6 @@ namespace GravityFun
         for (int i = 0; i < AnimatedModels.size(); i++)
         {
             auto model = AnimatedModels[i];
-            auto t = AnimatedModelsToT[model];
             auto model_matrix =
                 Math::Matrix4x4::Translation(start + i * (HINT_ICON_SIZE + HINT_ICON_PADDING) * 2, 1 - HINT_ICON_SIZE - HINT_ICON_PADDING, 0)
                 * Math::Matrix4x4::Scale(
@@ -144,7 +147,6 @@ namespace GravityFun
                     1
                 );
             glUniformMatrix4fv(ProgramModelUniform, 1, GL_FALSE, model_matrix.GetData());
-            model->Update(t);
             model->Render();
         }
 

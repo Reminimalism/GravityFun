@@ -17,10 +17,16 @@ namespace GravityFun
             throw std::length_error("Vertices0's and vertices1's sizes must be equal.");
     }
 
-    void AnimatedModel::Update(float t)
+    void AnimatedModel::SetState(float t)
     {
         for (int i = 0; i < Vertices0.size(); i++)
             Vertices[i] = Vertices0[i] + (Vertices1[i] - Vertices0[i]) * t;
         UpdateVertices();
+        State = t;
+    }
+
+    float AnimatedModel::GetState()
+    {
+        return State;
     }
 }

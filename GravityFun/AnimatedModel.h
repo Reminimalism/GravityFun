@@ -16,7 +16,8 @@ namespace GravityFun
         AnimatedModel(std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> buffers);
 
         /// @param t A number between 0 and 1 that linearly controls the state of the model.
-        void Update(float t);
+        void SetState(float t);
+        float GetState();
 
         AnimatedModel(const AnimatedModel&) = delete;
         AnimatedModel(AnimatedModel&&) = delete;
@@ -25,5 +26,6 @@ namespace GravityFun
     private:
         std::vector<float> Vertices0;
         std::vector<float> Vertices1;
+        float State;
     };
 }
