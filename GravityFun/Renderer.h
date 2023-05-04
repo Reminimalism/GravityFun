@@ -41,6 +41,9 @@ namespace GravityFun
 
         AnimatedModel DownGravityToggle;
         AnimatedModel RelativeGravityToggle;
+        AnimatedModel VariableMassToggle;
+        AnimatedModel BorderCollisionToggle;
+        AnimatedModel ObjectCollisionToggle;
 
         std::vector<AnimatedModel*> AnimatedModels;
         std::map<AnimatedModel*, std::function<float()>> AnimationTargetFunctions;

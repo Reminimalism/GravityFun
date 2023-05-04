@@ -662,6 +662,9 @@ namespace GravityFun::BufferGeneration
 
         next_index += 4;
 
+        if (headsize0.x == 0 && headsize0.y == 0 && headsize1.x == 0 && headsize1.y == 0)
+            return;
+
         // arrow head
 
         v0 = tailpos0 + (direction0 * taillength0) + left0 * headsize0.x;
@@ -811,7 +814,7 @@ namespace GravityFun::BufferGeneration
             Math::Vec2(-0.5, 0), Math::Vec2(-0.25, 0),
             0.05, Math::Vec2(0.1, 0.2),
             Math::Vec2(-0.75, 0), Math::Vec2(-0.1, 0),
-            0.05, Math::Vec2(0.2, 0.2)
+            0.05, Math::Vec2(0.25, 0.25)
         );
 
         generate_animated_arrow(
@@ -823,7 +826,178 @@ namespace GravityFun::BufferGeneration
             Math::Vec2(0.5, 0), Math::Vec2(0.25, 0),
             0.05, Math::Vec2(0.1, 0.2),
             Math::Vec2(0.75, 0), Math::Vec2(0.1, 0),
-            0.05, Math::Vec2(0.2, 0.2)
+            0.05, Math::Vec2(0.25, 0.25)
+        );
+
+        return std::make_tuple(vertices0, vertices1, indices);
+    }
+
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateVariableMassToggle(
+            int circle_resolution,
+            float z
+        )
+    {
+        if (circle_resolution < 8)
+            circle_resolution = 8;
+
+        std::vector<float> vertices0;
+        std::vector<float> vertices1;
+        std::vector<unsigned int> indices;
+
+        int next_index = 0;
+
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z, circle_resolution,
+            0.1, -0.75, 0.25,
+            0.1, -0.65, 0.15
+        );
+
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z, circle_resolution,
+            -0.55, 0.25, 0.25,
+            -0.6, 0.25, 0.2
+        );
+
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z, circle_resolution,
+            0.6, 0.6, 0.25,
+            0.5, 0.5, 0.35
+        );
+
+        return std::make_tuple(vertices0, vertices1, indices);
+    }
+
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateBorderCollisionToggle(
+            int circle_resolution,
+            float z
+        )
+    {
+        if (circle_resolution < 8)
+            circle_resolution = 8;
+
+        std::vector<float> vertices0;
+        std::vector<float> vertices1;
+        std::vector<unsigned int> indices;
+
+        int next_index = 0;
+
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z, circle_resolution,
+            0.75, 0.75, 0.25,
+            0.75, 0.75, 0.25
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(-1, 0), Math::Vec2(1, 0),
+            0.2, Math::Vec2(0, 0),
+            Math::Vec2(-1, 0), Math::Vec2(1, 0),
+            0.2, Math::Vec2(0, 0)
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(0.75, 0.75), Math::Vec2(0, 0),
+            0.05, Math::Vec2(0, 0),
+            Math::Vec2(0.75, 0.75), Math::Vec2(0, 0),
+            0.05, Math::Vec2(0, 0)
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(0, 0), Math::Vec2(-0.75, -0.75),
+            0.05, Math::Vec2(0.25, 0.3),
+            Math::Vec2(0, 0), Math::Vec2(-0.75, 0.75),
+            0.05, Math::Vec2(0.25, 0.3)
+        );
+
+        return std::make_tuple(vertices0, vertices1, indices);
+    }
+
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateObjectCollisionToggle(
+            int circle_resolution,
+            float z
+        )
+    {
+        if (circle_resolution < 8)
+            circle_resolution = 8;
+
+        std::vector<float> vertices0;
+        std::vector<float> vertices1;
+        std::vector<unsigned int> indices;
+
+        int next_index = 0;
+
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z, circle_resolution,
+            0.75, -0.75, 0.2,
+            0.75, -0.75, 0.2
+        );
+
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z, circle_resolution,
+            0, 0, 0.4,
+            -0.4, 0, 0.4
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(0.75, -0.75), Math::Vec2(0, 0),
+            0.05, Math::Vec2(0, 0),
+            Math::Vec2(0.75, -0.75), Math::Vec2(0, 0),
+            0.05, Math::Vec2(0, 0)
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(0, 0), Math::Vec2(-0.75, 0.75),
+            0.05, Math::Vec2(0.25, 0.3),
+            Math::Vec2(0, 0), Math::Vec2(0.75, 0.75),
+            0.05, Math::Vec2(0.25, 0.3)
         );
 
         return std::make_tuple(vertices0, vertices1, indices);

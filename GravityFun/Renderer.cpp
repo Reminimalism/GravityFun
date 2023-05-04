@@ -27,6 +27,9 @@ namespace GravityFun
           Circle(BufferGeneration::GenerateCircle(CIRCLE_RESOLUTION)),
           DownGravityToggle(BufferGeneration::GenerateDownGravityToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
           RelativeGravityToggle(BufferGeneration::GenerateRelativeGravityToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
+          VariableMassToggle(BufferGeneration::GenerateVariableMassToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
+          BorderCollisionToggle(BufferGeneration::GenerateBorderCollisionToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
+          ObjectCollisionToggle(BufferGeneration::GenerateObjectCollisionToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
           LastTime(std::chrono::steady_clock::now()),
           LoopScheduler::Module(false, nullptr, nullptr, true)
     {
@@ -37,8 +40,14 @@ namespace GravityFun
 
         AnimatedModels.push_back(&DownGravityToggle);
         AnimatedModels.push_back(&RelativeGravityToggle);
+        AnimatedModels.push_back(&VariableMassToggle);
+        AnimatedModels.push_back(&BorderCollisionToggle);
+        AnimatedModels.push_back(&ObjectCollisionToggle);
         AnimationTargetFunctions[&DownGravityToggle] = [this]() { return _GameManager->IsDownGravityOn() ? 1 : 0; };
         AnimationTargetFunctions[&RelativeGravityToggle] = [this]() { return _GameManager->IsRelativeGravityOn() ? 1 : 0; };
+        AnimationTargetFunctions[&VariableMassToggle] = [this]() { return _GameManager->IsVariableMassOn() ? 1 : 0; };
+        AnimationTargetFunctions[&BorderCollisionToggle] = [this]() { return _GameManager->IsBorderCollisionOn() ? 1 : 0; };
+        AnimationTargetFunctions[&ObjectCollisionToggle] = [this]() { return _GameManager->IsObjectCollisionOn() ? 1 : 0; };
 
         for (auto& item : AnimatedModels)
             item->SetState(AnimationTargetFunctions[item]());
