@@ -1,7 +1,10 @@
 #include "GravityFun.h"
 
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -13,7 +16,44 @@ int main()
     std::cout << GravityFun::Info::LICENSE << '\n';
     std::cout << GravityFun::Info::DESCRIPTION << '\n';
 
-    auto hardware_concurrency = std::thread::hardware_concurrency();
+    auto concurrency = std::thread::hardware_concurrency();
+
+    // Override concurrency if the conf exists with a concurrency value
+    constexpr auto conf_filename = "GravityFun.conf";
+    if (std::filesystem::exists(conf_filename) && std::filesystem::is_regular_file(conf_filename))
+    {
+        std::ifstream conf(conf_filename);
+        std::string line;
+        while (std::getline(conf, line))
+        {
+            auto i = line.find("concurrency");
+            if (i == std::string::npos)
+                continue;
+            i += std::string("concurrency").length();
+            for (; i < line.length(); i++)
+                if (line[i] != ' ')
+                    break;
+            if (line[i] != '=')
+                continue;
+            i++;
+            for (; i < line.length(); i++)
+                if (line[i] != ' ')
+                    break;
+            int j = i;
+            for (; j < line.length(); j++)
+                if (!std::isdigit(line[i]))
+                    break;
+            if (i != j)
+            {
+                concurrency = std::stoi(line.substr(i, j - i));
+                if (concurrency < 1)
+                    concurrency = 1;
+                if (concurrency > 1024)
+                    concurrency = 1024;
+                std::cout << "Config found, concurrency set to " << concurrency << ".\n";
+            }
+        }
+    }
 
     // Modules Initialization
 
@@ -22,7 +62,7 @@ int main()
     std::shared_ptr<GravityFun::GameManager> game_manager(new GravityFun::GameManager(window, energy_saver));
     std::vector<std::shared_ptr<GravityFun::Physics>> physics_pass1;
     std::vector<std::shared_ptr<GravityFun::Physics>> physics_pass2; // hybrid pass
-    auto physics_modules_count = hardware_concurrency;
+    auto physics_modules_count = concurrency;
     for (int i = 0; i < physics_modules_count; i++)
         physics_pass1.push_back(
             std::shared_ptr<GravityFun::Physics>(
@@ -76,7 +116,7 @@ int main()
 
     LoopScheduler::Loop loop(root_group);
 
-    loop.Run(hardware_concurrency);
+    loop.Run(concurrency);
 
     return 0;
 }
