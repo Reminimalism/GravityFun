@@ -22,5 +22,6 @@
 #include "Window.h"
 #include "GameManager.h"
 #include "Physics.h"
+#include "EnergySaver.h"
 #include "ShaderProgram.h"
 #include "Renderer.h"

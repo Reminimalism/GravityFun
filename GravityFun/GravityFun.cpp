@@ -18,7 +18,8 @@ int main()
     // Modules Initialization
 
     std::shared_ptr<GravityFun::Window> window(new GravityFun::Window());
-    std::shared_ptr<GravityFun::GameManager> game_manager(new GravityFun::GameManager(window));
+    std::shared_ptr<GravityFun::EnergySaver> energy_saver(new GravityFun::EnergySaver());
+    std::shared_ptr<GravityFun::GameManager> game_manager(new GravityFun::GameManager(window, energy_saver));
     std::vector<std::shared_ptr<GravityFun::Physics>> physics_pass1;
     std::vector<std::shared_ptr<GravityFun::Physics>> physics_pass2; // hybrid pass
     auto physics_modules_count = hardware_concurrency;
@@ -55,7 +56,8 @@ int main()
         std::vector<LoopScheduler::SequentialGroupMember>({
             physics_pass1_group,
             physics_pass2_group,
-            game_manager->GetPhysicsPassNotifier()
+            game_manager->GetPhysicsPassNotifier(),
+            energy_saver
         })
     ));
     std::shared_ptr<LoopScheduler::ParallelGroup> physics_and_render_group(new LoopScheduler::ParallelGroup(

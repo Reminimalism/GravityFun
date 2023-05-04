@@ -36,7 +36,8 @@ namespace GravityFun
                 (std::log2(GameManager::DEFAULT_TIME_MULTIPLIER) - std::log2(GameManager::MIN_TIME_MULTIPLIER))
                     / (std::log2(GameManager::MAX_TIME_MULTIPLIER) - std::log2(GameManager::MIN_TIME_MULTIPLIER)),
                 HINT_ICON_Z
-              )),
+          )),
+          EnergySavingSlider(BufferGeneration::GenerateEnergySavingSlider(CIRCLE_RESOLUTION, HINT_ICON_Z)),
           LastTime(std::chrono::steady_clock::now()),
           LoopScheduler::Module(false, nullptr, nullptr, true)
     {
@@ -52,6 +53,7 @@ namespace GravityFun
         AnimatedModels.push_back(&ObjectCollisionToggle);
         AnimatedModels.push_back(&ObjectsCountSlider);
         AnimatedModels.push_back(&TimeMultiplierSlider);
+        AnimatedModels.push_back(&EnergySavingSlider);
         AnimationTargetFunctions[&DownGravityToggle] = [this]() { return _GameManager->IsDownGravityOn() ? 1 : 0; };
         AnimationTargetFunctions[&RelativeGravityToggle] = [this]() { return _GameManager->IsRelativeGravityOn() ? 1 : 0; };
         AnimationTargetFunctions[&VariableMassToggle] = [this]() { return _GameManager->IsVariableMassOn() ? 1 : 0; };
@@ -61,6 +63,9 @@ namespace GravityFun
         AnimationTargetFunctions[&TimeMultiplierSlider] = [this]() {
             return (std::log2(_GameManager->GetTimeMultiplier()) - std::log2(GameManager::MIN_TIME_MULTIPLIER))
                 / (std::log2(GameManager::MAX_TIME_MULTIPLIER) - std::log2(GameManager::MIN_TIME_MULTIPLIER));
+        };
+        AnimationTargetFunctions[&EnergySavingSlider] = [this]() {
+            return 1.0 - _GameManager->GetEnergySavingFactor();
         };
 
         for (auto& item : AnimatedModels)

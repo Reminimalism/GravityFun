@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "Window.h"
+#include "EnergySaver.h"
 
 namespace GravityFun
 {
@@ -12,9 +13,11 @@ namespace GravityFun
         _GameManager->PhysicsPassNotify();
     }
 
-    GameManager::GameManager(std::shared_ptr<Window> window)
-        : _Window(window), _PhysicsPassNotifier(new PhysicsPassNotifier(this)), MainThreadId(std::this_thread::get_id()),
+    GameManager::GameManager(std::shared_ptr<Window> window, std::shared_ptr<EnergySaver> energy_saver)
+        : _Window(window), _EnergySaver(energy_saver),
+          _PhysicsPassNotifier(new PhysicsPassNotifier(this)), MainThreadId(std::this_thread::get_id()),
           ObjectsCount(DEFAULT_OBJECTS_COUNT), TimeMultiplier(DEFAULT_TIME_MULTIPLIER),
+          EnergySavingFactor(DEFAULT_ENERGY_SAVING_FACTOR),
           DownGravityOn(false), RelativeGravityOn(false),
           VariableMassOn(false),
           BorderCollisionOn(true), ObjectCollisionOn(false),
@@ -37,6 +40,7 @@ namespace GravityFun
                 );
             }
         }
+        _EnergySaver->SetEnergySavingFactor(EnergySavingFactor);
     }
 
     bool GameManager::CanRun()
@@ -127,6 +131,32 @@ namespace GravityFun
                 TimeMultiplier = temp;
         }
 
+        // Energy saving factor
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_EQUAL)
+            || _Window->GetRepeatedKeys().contains(GLFW_KEY_EQUAL)
+            || _Window->GetPressedKeys().contains(GLFW_KEY_KP_ADD)
+            || _Window->GetRepeatedKeys().contains(GLFW_KEY_KP_ADD))
+        {
+            auto temp = EnergySavingFactor - 0.125;
+            if (0 <= temp)
+            {
+                EnergySavingFactor = temp;
+                _EnergySaver->SetEnergySavingFactor(EnergySavingFactor);
+            }
+        }
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_MINUS)
+            || _Window->GetRepeatedKeys().contains(GLFW_KEY_MINUS)
+            || _Window->GetPressedKeys().contains(GLFW_KEY_KP_SUBTRACT)
+            || _Window->GetRepeatedKeys().contains(GLFW_KEY_KP_SUBTRACT))
+        {
+            auto temp = EnergySavingFactor + 0.125;
+            if (temp <= 1)
+            {
+                EnergySavingFactor = temp;
+                _EnergySaver->SetEnergySavingFactor(EnergySavingFactor);
+            }
+        }
+
         // Update AspectRatio, BorderX, and BorderY
         int width, height;
         _Window->GetSize(width, height);
@@ -180,6 +210,10 @@ namespace GravityFun
     double GameManager::GetTimeMultiplier()
     {
         return TimeMultiplier;
+    }
+    double GameManager::GetEnergySavingFactor()
+    {
+        return EnergySavingFactor;
     }
     bool GameManager::IsDownGravityOn()
     {

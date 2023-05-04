@@ -1173,4 +1173,169 @@ namespace GravityFun::BufferGeneration
 
         return std::make_tuple(vertices0, vertices1, indices);
     }
+
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateEnergySavingSlider(
+            int circle_resolution,
+            float z
+        )
+    {
+        if (circle_resolution < 8)
+            circle_resolution = 8;
+
+        constexpr float slider_x = 0;
+        constexpr float plusminus_x = 0.6;
+        constexpr float icon_x = -0.6;
+
+        std::vector<float> vertices0;
+        std::vector<float> vertices1;
+        std::vector<unsigned int> indices;
+
+        int next_index = 0;
+
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            circle_resolution,
+            slider_x, -0.8, 0.22,
+            slider_x, -0.8, 0.20
+        );
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(slider_x, -0.8), Math::Vec2(slider_x, 1),
+            0.04, Math::Vec2(0, 0),
+            Math::Vec2(slider_x, -0.8), Math::Vec2(slider_x, 1),
+            0.04, Math::Vec2(0, 0)
+        );
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(slider_x, -0.8), Math::Vec2(slider_x, -0.6),
+            0.1, Math::Vec2(0, 0),
+            Math::Vec2(slider_x, -0.8), Math::Vec2(slider_x, 1),
+            0.1, Math::Vec2(0, 0)
+        );
+
+        // +'s vertical line
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(plusminus_x, 0), Math::Vec2(plusminus_x, 0.4),
+            0.05, Math::Vec2(0, 0),
+            Math::Vec2(plusminus_x, 0.6), Math::Vec2(plusminus_x, 1),
+            0.05, Math::Vec2(0, 0)
+        );
+
+        // +'s horizontal line
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(plusminus_x - 0.2, 0.2), Math::Vec2(plusminus_x + 0.2, 0.2),
+            0.05, Math::Vec2(0, 0),
+            Math::Vec2(plusminus_x - 0.2, 0.8), Math::Vec2(plusminus_x + 0.2, 0.8),
+            0.05, Math::Vec2(0, 0)
+        );
+
+        // -
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(plusminus_x - 0.2, -0.8), Math::Vec2(plusminus_x + 0.2, -0.8),
+            0.05, Math::Vec2(0, 0),
+            Math::Vec2(plusminus_x - 0.2, -0.2), Math::Vec2(plusminus_x + 0.2, -0.2),
+            0.05, Math::Vec2(0, 0)
+        );
+
+        // leaf
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            circle_resolution,
+            icon_x, -0.5, 0.2,
+            icon_x, -0.5, 0.1
+        );
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(icon_x + 0.1, -0.5), Math::Vec2(icon_x + 0.1, -0.5 + 0.2),
+            0.1, Math::Vec2(0, 0),
+            Math::Vec2(icon_x + 0.05, -0.5), Math::Vec2(icon_x + 0.05, -0.5 + 0.1),
+            0.05, Math::Vec2(0, 0)
+        );
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(icon_x - 0.1, -0.5), Math::Vec2(icon_x - 0.1, -0.5 - 0.2),
+            0.1, Math::Vec2(0, 0),
+            Math::Vec2(icon_x - 0.05, -0.5), Math::Vec2(icon_x - 0.05, -0.5 - 0.1),
+            0.05, Math::Vec2(0, 0)
+        );
+
+        float small_offset = 0.05;
+        float big_offset = 0.15;
+
+        // power icon
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(icon_x - small_offset, 0.5), Math::Vec2(icon_x + small_offset, 0.6),
+            0.05, Math::Vec2(0, 0),
+            Math::Vec2(icon_x - big_offset, 0.4), Math::Vec2(icon_x + big_offset, 0.6),
+            0.05, Math::Vec2(0, 0)
+        );
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(icon_x + small_offset, 0.6), Math::Vec2(icon_x - small_offset, 0.7),
+            0.05, Math::Vec2(0, 0),
+            Math::Vec2(icon_x + big_offset, 0.6), Math::Vec2(icon_x - big_offset, 0.8),
+            0.05, Math::Vec2(0, 0)
+        );
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(icon_x - small_offset, 0.7), Math::Vec2(icon_x + small_offset, 0.8),
+            0.05, Math::Vec2(0, 0),
+            Math::Vec2(icon_x - big_offset, 0.8), Math::Vec2(icon_x + big_offset, 1),
+            0.05, Math::Vec2(0, 0)
+        );
+
+        return std::make_tuple(vertices0, vertices1, indices);
+    }
 }

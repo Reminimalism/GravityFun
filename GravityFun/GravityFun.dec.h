@@ -32,6 +32,7 @@ Loop with threads=hardware_concurrency + 1:
                 ParallelGroup physics pass 2:
                     Physics[hardware_concurrency] // resolves collisions between objects if on, else, normal force/motion update.
                 GameManager.PhysicsPassNotifier
+                EnergySaver
 
 GameManager uses Window
 Renderer uses Window
@@ -53,4 +54,5 @@ namespace GravityFun
     class GameManager;
     class Renderer;
     class Physics;
+    class EnergySaver;
 }

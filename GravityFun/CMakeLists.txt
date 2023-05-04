@@ -12,6 +12,7 @@ endif()
 add_executable(GravityFun
     AnimatedModel.cpp
     BufferGeneration.cpp
+    EnergySaver.cpp
     FloatingObject.cpp
     GameManager.cpp
     GravityFun.cpp

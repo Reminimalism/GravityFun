@@ -47,6 +47,7 @@ namespace GravityFun
 
         AnimatedModel ObjectsCountSlider;
         AnimatedModel TimeMultiplierSlider;
+        AnimatedModel EnergySavingSlider;
 
         std::vector<AnimatedModel*> AnimatedModels;
         std::map<AnimatedModel*, std::function<float()>> AnimationTargetFunctions;

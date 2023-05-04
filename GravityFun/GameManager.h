@@ -25,7 +25,7 @@ namespace GravityFun
         };
         friend PhysicsPassNotifier;
 
-        explicit GameManager(std::shared_ptr<Window>);
+        explicit GameManager(std::shared_ptr<Window>, std::shared_ptr<EnergySaver>);
 
         GameManager(const GameManager&) = delete;
         GameManager(GameManager&&) = delete;
@@ -52,6 +52,7 @@ namespace GravityFun
         static constexpr double DEFAULT_TIME_MULTIPLIER = 1;
         static constexpr double MIN_TIME_MULTIPLIER = 0.125;
         static constexpr double MAX_TIME_MULTIPLIER = 8;
+        static constexpr double DEFAULT_ENERGY_SAVING_FACTOR = 0;
 
         /// @brief Used for physics. See also: COLLISION_PRESERVE
         static constexpr double COLLISION_LOSS = 0.2;
@@ -70,6 +71,8 @@ namespace GravityFun
 
         int GetObjectsCount();
         double GetTimeMultiplier();
+        /// @return In range [0, 1]
+        double GetEnergySavingFactor();
         bool IsDownGravityOn();
         bool IsRelativeGravityOn();
         bool IsVariableMassOn();
@@ -79,7 +82,6 @@ namespace GravityFun
         double GetBorderY();
         /// @brief Width / Height
         double GetAspectRatio();
-        // double GetComputationIntensity(); // TODO ?
         double GetMousePositionX();
         double GetMousePositionY();
         bool IsMousePulling();
@@ -91,6 +93,7 @@ namespace GravityFun
     private:
         std::shared_ptr<Window> _Window;
         std::shared_ptr<PhysicsPassNotifier> _PhysicsPassNotifier;
+        std::shared_ptr<EnergySaver> _EnergySaver;
 
         std::thread::id MainThreadId;
 
@@ -108,6 +111,7 @@ namespace GravityFun
 
         int ObjectsCount;
         double TimeMultiplier;
+        double EnergySavingFactor;
         bool DownGravityOn;
         bool RelativeGravityOn;
         bool VariableMassOn;
