@@ -10,14 +10,15 @@ namespace GravityFun::Info
     /// @brief Indented multiline string with extra newlines at the beginning and the end.
     const char * const DESCRIPTION = R"(
     Controls:
-        G: Toggle down gravity
-        R: Toggle relative gravity
-        M: Toggle variable mass (when adding objects)
-        B: Toggle border collision
-        C: Toggle object to object collision
+        G or 1: Toggle down gravity
+        R or 2: Toggle relative gravity
+        M or 3: Toggle variable mass (when adding objects)
+        B or 4: Toggle border collision
+        C or 5: Toggle object to object collision
         Up/Down: Add/remove objects
         Left/Right: Decrease/increase time multiplier (simulation speed)
             Possible time multiplier values: 0.125x, 0.25x, 0.5x, 1x, 2x, 4x, 8x
+        -/+: Decrease/increase physics simulation CPU usage
         Mouse left button: Pull objects toward mouse
         Mouse right button: Push objects away from mouse
         Mouse middle button: Apply brake

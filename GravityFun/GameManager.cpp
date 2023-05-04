@@ -58,15 +58,20 @@ namespace GravityFun
         PhysicsPass1ReadBufferIndex = RenderBufferIndex;
 
         // Toggles
-        if (_Window->GetPressedKeys().contains(GLFW_KEY_G))
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_G)
+            || _Window->GetPressedKeys().contains(GLFW_KEY_1))
             DownGravityOn = !DownGravityOn;
-        if (_Window->GetPressedKeys().contains(GLFW_KEY_R))
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_R)
+            || _Window->GetPressedKeys().contains(GLFW_KEY_2))
             RelativeGravityOn = !RelativeGravityOn;
-        if (_Window->GetPressedKeys().contains(GLFW_KEY_M))
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_M)
+            || _Window->GetPressedKeys().contains(GLFW_KEY_3))
             VariableMassOn = !VariableMassOn;
-        if (_Window->GetPressedKeys().contains(GLFW_KEY_B))
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_B)
+            || _Window->GetPressedKeys().contains(GLFW_KEY_4))
             BorderCollisionOn = !BorderCollisionOn;
-        if (_Window->GetPressedKeys().contains(GLFW_KEY_C))
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_C)
+            || _Window->GetPressedKeys().contains(GLFW_KEY_5))
             ObjectCollisionOn = !ObjectCollisionOn;
 
         // Objects count
