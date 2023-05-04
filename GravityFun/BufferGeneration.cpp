@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <numbers>
+#include <random>
 
 #include "Math.h"
 
@@ -998,6 +999,176 @@ namespace GravityFun::BufferGeneration
             0.05, Math::Vec2(0.25, 0.3),
             Math::Vec2(0, 0), Math::Vec2(0.75, 0.75),
             0.05, Math::Vec2(0.25, 0.3)
+        );
+
+        return std::make_tuple(vertices0, vertices1, indices);
+    }
+
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateObjectsCountSlider(
+            int circle_resolution,
+            float z
+        )
+    {
+        if (circle_resolution < 8)
+            circle_resolution = 8;
+
+        constexpr float slider_x = 0;
+        constexpr float arrows_x = -0.5;
+        constexpr float objects_x = 0.75;
+
+        std::vector<float> vertices0;
+        std::vector<float> vertices1;
+        std::vector<unsigned int> indices;
+
+        int next_index = 0;
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(slider_x, -1), Math::Vec2(slider_x, 1),
+            0.05, Math::Vec2(0, 0),
+            Math::Vec2(slider_x, -1), Math::Vec2(slider_x, 1),
+            0.05, Math::Vec2(0, 0)
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(slider_x, -1), Math::Vec2(slider_x, -0.99),
+            0.2, Math::Vec2(0, 0),
+            Math::Vec2(slider_x, -1), Math::Vec2(slider_x, 1),
+            0.2, Math::Vec2(0, 0)
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(arrows_x, -0.4), Math::Vec2(arrows_x, -1),
+            0.05, Math::Vec2(0.2, 0.3),
+            Math::Vec2(arrows_x, 0.2), Math::Vec2(arrows_x, -0.4),
+            0.05, Math::Vec2(0.2, 0.3)
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(arrows_x, -0.2), Math::Vec2(arrows_x, 0.4),
+            0.05, Math::Vec2(0.2, 0.3),
+            Math::Vec2(arrows_x, 0.4), Math::Vec2(arrows_x, 1),
+            0.05, Math::Vec2(0.2, 0.3)
+        );
+
+        constexpr int count = 4;
+        std::uniform_real_distribution<double> distribution(-0.25, 0.25);
+        std::mt19937 mt;
+        for (int i = 0; i < count; i++)
+        {
+            mt.seed(i);
+            float x = objects_x + distribution(mt);
+            float y = -0.9 + 1.8 * ((float)i / (count - 1));
+            generate_animated_circle(
+                next_index,
+                vertices0,
+                vertices1,
+                indices,
+                z, circle_resolution,
+                x, y, 0.1,
+                x, y, 0.1
+            );
+        }
+
+        return std::make_tuple(vertices0, vertices1, indices);
+    }
+
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateTimeMultiplierSlider(
+            int circle_resolution,
+            float default_value_mark,
+            float z
+        )
+    {
+        if (circle_resolution < 8)
+            circle_resolution = 8;
+
+        constexpr float slider_y = 0;
+        constexpr float arrows_y = 0.75;
+
+        std::vector<float> vertices0;
+        std::vector<float> vertices1;
+        std::vector<unsigned int> indices;
+
+        int next_index = 0;
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(-1, slider_y), Math::Vec2(1, slider_y),
+            0.05, Math::Vec2(0, 0),
+            Math::Vec2(-1, slider_y), Math::Vec2(1, slider_y),
+            0.05, Math::Vec2(0, 0)
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(-1, slider_y), Math::Vec2(-0.99, slider_y),
+            0.2, Math::Vec2(0, 0),
+            Math::Vec2(-1, slider_y), Math::Vec2(1, slider_y),
+            0.2, Math::Vec2(0, 0)
+        );
+
+        float x = -1 + 2 * default_value_mark;
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(x, slider_y - 0.4), Math::Vec2(x, slider_y + 0.4),
+            0.05, Math::Vec2(0, 0),
+            Math::Vec2(x, slider_y - 0.4), Math::Vec2(x, slider_y + 0.4),
+            0.05, Math::Vec2(0, 0)
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(-0.4, arrows_y), Math::Vec2(-1, arrows_y),
+            0.05, Math::Vec2(0.2, 0.3),
+            Math::Vec2(0.2, arrows_y), Math::Vec2(-0.4, arrows_y),
+            0.05, Math::Vec2(0.2, 0.3)
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(-0.2, arrows_y), Math::Vec2(0.4, arrows_y),
+            0.05, Math::Vec2(0.2, 0.3),
+            Math::Vec2(0.4, arrows_y), Math::Vec2(1, arrows_y),
+            0.05, Math::Vec2(0.2, 0.3)
         );
 
         return std::make_tuple(vertices0, vertices1, indices);

@@ -17,7 +17,7 @@ constexpr float ROUNDED_SQUARE_CORNER_RADIUS = 0.5;
 constexpr float HINT_ICON_Z = 0.05;
 constexpr float HINT_ICON_SIZE = 0.03;
 constexpr float HINT_ICON_PADDING = 0.01;
-constexpr float HINT_ICON_ANIMATION_SPEED = 2;
+constexpr float HINT_ICON_ANIMATION_SPEED = 4;
 
 namespace GravityFun
 {
@@ -30,6 +30,13 @@ namespace GravityFun
           VariableMassToggle(BufferGeneration::GenerateVariableMassToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
           BorderCollisionToggle(BufferGeneration::GenerateBorderCollisionToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
           ObjectCollisionToggle(BufferGeneration::GenerateObjectCollisionToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
+          ObjectsCountSlider(BufferGeneration::GenerateObjectsCountSlider(CIRCLE_RESOLUTION, HINT_ICON_Z)),
+          TimeMultiplierSlider(BufferGeneration::GenerateTimeMultiplierSlider(
+                CIRCLE_RESOLUTION,
+                (std::log2(GameManager::DEFAULT_TIME_MULTIPLIER) - std::log2(GameManager::MIN_TIME_MULTIPLIER))
+                    / (std::log2(GameManager::MAX_TIME_MULTIPLIER) - std::log2(GameManager::MIN_TIME_MULTIPLIER)),
+                HINT_ICON_Z
+              )),
           LastTime(std::chrono::steady_clock::now()),
           LoopScheduler::Module(false, nullptr, nullptr, true)
     {
@@ -43,11 +50,18 @@ namespace GravityFun
         AnimatedModels.push_back(&VariableMassToggle);
         AnimatedModels.push_back(&BorderCollisionToggle);
         AnimatedModels.push_back(&ObjectCollisionToggle);
+        AnimatedModels.push_back(&ObjectsCountSlider);
+        AnimatedModels.push_back(&TimeMultiplierSlider);
         AnimationTargetFunctions[&DownGravityToggle] = [this]() { return _GameManager->IsDownGravityOn() ? 1 : 0; };
         AnimationTargetFunctions[&RelativeGravityToggle] = [this]() { return _GameManager->IsRelativeGravityOn() ? 1 : 0; };
         AnimationTargetFunctions[&VariableMassToggle] = [this]() { return _GameManager->IsVariableMassOn() ? 1 : 0; };
         AnimationTargetFunctions[&BorderCollisionToggle] = [this]() { return _GameManager->IsBorderCollisionOn() ? 1 : 0; };
         AnimationTargetFunctions[&ObjectCollisionToggle] = [this]() { return _GameManager->IsObjectCollisionOn() ? 1 : 0; };
+        AnimationTargetFunctions[&ObjectsCountSlider] = [this]() { return (float)_GameManager->GetObjectsCount() / GameManager::MAX_OBJECTS_COUNT; };
+        AnimationTargetFunctions[&TimeMultiplierSlider] = [this]() {
+            return (std::log2(_GameManager->GetTimeMultiplier()) - std::log2(GameManager::MIN_TIME_MULTIPLIER))
+                / (std::log2(GameManager::MAX_TIME_MULTIPLIER) - std::log2(GameManager::MIN_TIME_MULTIPLIER));
+        };
 
         for (auto& item : AnimatedModels)
             item->SetState(AnimationTargetFunctions[item]());

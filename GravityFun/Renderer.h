@@ -45,6 +45,9 @@ namespace GravityFun
         AnimatedModel BorderCollisionToggle;
         AnimatedModel ObjectCollisionToggle;
 
+        AnimatedModel ObjectsCountSlider;
+        AnimatedModel TimeMultiplierSlider;
+
         std::vector<AnimatedModel*> AnimatedModels;
         std::map<AnimatedModel*, std::function<float()>> AnimationTargetFunctions;
         struct Animation { public: float s, e, t; };
