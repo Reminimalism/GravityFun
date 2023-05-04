@@ -719,7 +719,10 @@ namespace GravityFun::BufferGeneration
         next_index += 3;
     }
 
-    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateDownGravityToggle(int circle_resolution, float z)
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateDownGravityToggle(
+            int circle_resolution,
+            float z
+        )
     {
         if (circle_resolution < 8)
             circle_resolution = 8;
@@ -739,6 +742,7 @@ namespace GravityFun::BufferGeneration
         std::vector<unsigned int> indices;
 
         int next_index = 0;
+
         generate_animated_circle(
             next_index,
             vertices0,
@@ -759,6 +763,67 @@ namespace GravityFun::BufferGeneration
             arrow_size, Math::Vec2(arrow_head_size_x / 2, arrow_head_size_y / 2),
             Math::Vec2(0, arrow_start_y), Math::Vec2(0, arrow_head_start_y - arrow_head_size_y),
             arrow_size, Math::Vec2(arrow_head_size_x, arrow_head_size_y)
+        );
+
+        return std::make_tuple(vertices0, vertices1, indices);
+    }
+
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateRelativeGravityToggle(
+            int circle_resolution,
+            float z
+        )
+    {
+        if (circle_resolution < 8)
+            circle_resolution = 8;
+
+        std::vector<float> vertices0;
+        std::vector<float> vertices1;
+        std::vector<unsigned int> indices;
+
+        int next_index = 0;
+
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z, circle_resolution,
+            -0.5, 0, 0.4,
+            -0.75, 0, 0.25
+        );
+
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z, circle_resolution,
+            0.5, 0, 0.4,
+            0.75, 0, 0.25
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(-0.5, 0), Math::Vec2(-0.25, 0),
+            0.05, Math::Vec2(0.1, 0.2),
+            Math::Vec2(-0.75, 0), Math::Vec2(-0.1, 0),
+            0.05, Math::Vec2(0.2, 0.2)
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(0.5, 0), Math::Vec2(0.25, 0),
+            0.05, Math::Vec2(0.1, 0.2),
+            Math::Vec2(0.75, 0), Math::Vec2(0.1, 0),
+            0.05, Math::Vec2(0.2, 0.2)
         );
 
         return std::make_tuple(vertices0, vertices1, indices);

@@ -26,6 +26,7 @@ namespace GravityFun
           Program(SimpleVertexShaderSource, SimpleFragmentShaderSource),
           Circle(BufferGeneration::GenerateCircle(CIRCLE_RESOLUTION)),
           DownGravityToggle(BufferGeneration::GenerateDownGravityToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
+          RelativeGravityToggle(BufferGeneration::GenerateRelativeGravityToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
           LastTime(std::chrono::steady_clock::now()),
           LoopScheduler::Module(false, nullptr, nullptr, true)
     {
@@ -35,7 +36,12 @@ namespace GravityFun
         ProgramColorUniform = Program.GetUniformLocation("Color");
 
         AnimatedModels.push_back(&DownGravityToggle);
-        DownGravityToggle.SetState(_GameManager->IsDownGravityOn() ? 1 : 0);
+        AnimatedModels.push_back(&RelativeGravityToggle);
+        AnimationTargetFunctions[&DownGravityToggle] = [this]() { return _GameManager->IsDownGravityOn() ? 1 : 0; };
+        AnimationTargetFunctions[&RelativeGravityToggle] = [this]() { return _GameManager->IsRelativeGravityOn() ? 1 : 0; };
+
+        for (auto& item : AnimatedModels)
+            item->SetState(AnimationTargetFunctions[item]());
 
         glEnable(GL_DEPTH_TEST);
     }
@@ -88,19 +94,22 @@ namespace GravityFun
         glUniformMatrix4fv(ProgramProjectionUniform, 1, GL_FALSE, ProjectionMatrix.GetData());
 
         // Update hints
-        float temp = _GameManager->IsDownGravityOn() ? 1 : 0;
-        if (
-                temp != DownGravityToggle.GetState()
-                && (
-                    !ActiveToggleAnimations.contains(&DownGravityToggle)
-                    || temp != ActiveToggleAnimations[&DownGravityToggle].e
+        for (auto& item : AnimatedModels)
+        {
+            float temp = AnimationTargetFunctions[item]();
+            if (
+                    temp != item->GetState()
+                    && (
+                        !ActiveToggleAnimations.contains(item)
+                        || temp != ActiveToggleAnimations[item].e
+                    )
                 )
-            )
-            ActiveToggleAnimations[&DownGravityToggle] = Animation{
-                DownGravityToggle.GetState(),
-                temp,
-                0
-            };
+                ActiveToggleAnimations[item] = Animation{
+                    item->GetState(),
+                    temp,
+                    0
+                };
+        }
 
         // Update time
         auto now = std::chrono::steady_clock::now();

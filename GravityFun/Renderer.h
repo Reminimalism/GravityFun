@@ -9,6 +9,7 @@
 
 #include "../glad/include/glad/glad.h"
 
+#include <functional>
 #include <chrono>
 #include <map>
 #include <memory>
@@ -37,8 +38,12 @@ namespace GravityFun
         std::thread::id MainThreadId;
 
         Model Circle;
+
         AnimatedModel DownGravityToggle;
+        AnimatedModel RelativeGravityToggle;
+
         std::vector<AnimatedModel*> AnimatedModels;
+        std::map<AnimatedModel*, std::function<float()>> AnimationTargetFunctions;
         struct Animation { public: float s, e, t; };
         std::map<AnimatedModel*, Animation> ActiveToggleAnimations;
         std::chrono::steady_clock::time_point LastTime;
