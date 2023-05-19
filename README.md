@@ -5,6 +5,24 @@ The rendering is done using OpenGL with the help of GLFW and GLAD.
 
 # How to use
 
+## Controls
+
+The controls are listed in the table below.
+
+| Input(s) | Control |
+| ------ | ------- |
+| G or 1 | Toggle global downward gravity |
+| R or 2 | Toggle relative gravity |
+| M or 3 | Toggle variable mass (when adding objects) |
+| B or 4 | Toggle border collision |
+| C or 5 | Toggle object to object collision |
+| Up/Down | Add/remove objects |
+| Left/Right | Decrease/increase time multiplier (simulation speed) |
+| -/+ | Decrease/increase physics simulation CPU usage |
+| Mouse left button | Pull objects toward mouse |
+| Mouse right button | Push objects away from mouse |
+| Mouse middle button | Apply brake |
+
 ## Download (no build)
 
 You can download Linux or Windows builds from [the latest release](https://github.com/Reminimalism/GravityFun/releases/latest).
