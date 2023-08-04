@@ -8,7 +8,7 @@ namespace GravityFun
     int Window::ObjectsCount = 0;
     std::map<GLFWwindow*, Window*> Window::ObjectsMap;
 
-    Window::Window() : ResizeCallback(nullptr),
+    Window::Window(const std::string& title) : ResizeCallback(nullptr),
                        MousePosition({0, 0}),
                        MouseLeftButton(false),
                        MouseRightButton(false),
@@ -27,8 +27,8 @@ namespace GravityFun
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_SAMPLES, 8);
-        _GLFWWindow = glfwCreateWindow(640, 480, "GravityFun", NULL, NULL);
-        //_GLFWWindow = glfwCreateWindow(640, 480, "GravityFun", glfwGetPrimaryMonitor(), NULL); // fullscreen
+        _GLFWWindow = glfwCreateWindow(640, 480, title.c_str(), NULL, NULL);
+        //_GLFWWindow = glfwCreateWindow(640, 480, title.c_str(), glfwGetPrimaryMonitor(), NULL); // fullscreen
         if (!_GLFWWindow)
         {
             ObjectsCount--;

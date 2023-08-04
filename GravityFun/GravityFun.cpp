@@ -12,7 +12,7 @@ int main()
 {
     std::cout << "Powered by:\n";
     std::cout << GravityFun::Info::DEPENDENCIES << '\n';
-    std::cout << GravityFun::Info::NAME << " v" << GravityFun::Info::VERSION << "\n";
+    std::cout << GravityFun::Info::CREATOR << " - " << GravityFun::Info::NAME << " v" << GravityFun::Info::VERSION << "\n";
     std::cout << GravityFun::Info::LICENSE << '\n';
     std::cout << GravityFun::Info::DESCRIPTION << '\n';
 
@@ -57,7 +57,7 @@ int main()
 
     // Modules Initialization
 
-    std::shared_ptr<GravityFun::Window> window(new GravityFun::Window());
+    std::shared_ptr<GravityFun::Window> window(new GravityFun::Window(std::string(GravityFun::Info::NAME) + " v" + GravityFun::Info::VERSION));
     std::shared_ptr<GravityFun::EnergySaver> energy_saver(new GravityFun::EnergySaver());
     std::shared_ptr<GravityFun::GameManager> game_manager(new GravityFun::GameManager(window, energy_saver));
     std::vector<std::shared_ptr<GravityFun::Physics>> physics_pass1;
