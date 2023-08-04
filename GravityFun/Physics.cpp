@@ -3,11 +3,12 @@
 #include "GameManager.h"
 
 #include <cmath>
+#include <utility>
 
 namespace GravityFun
 {
     Physics::Physics(std::shared_ptr<GameManager> game_manager, int number, int total, Physics * pass1)
-        : _GameManager(game_manager), Number(number), Total(total), Hybrid(pass1 != nullptr), Pass1(pass1)
+        : _GameManager(game_manager), Number(number), Total(total), Hybrid(pass1 != nullptr), Pass1(pass1), LastObjectCount(0)
     {
         LastTime = std::chrono::steady_clock::now();
     }
@@ -21,11 +22,16 @@ namespace GravityFun
             _GameManager->GetPhysicsPass2WriteBuffer()
             : _GameManager->GetPhysicsPass1WriteBuffer();
 
-        int begin = Number * read_buffer.size() / Total;
-        int end = (Number + 1) * read_buffer.size() / Total;
+        const int begin = Number * read_buffer.size() / Total;
+        const int end = (Number + 1) * read_buffer.size() / Total;
 
         if (Hybrid && _GameManager->IsObjectCollisionOn()) // Object collision mode
         {
+            if (LastObjectCount != read_buffer.size())
+            {
+                LastObjectCount = read_buffer.size();
+                LastCollisions.resize(end - begin);
+            }
             for (int i = begin; i < end; i++)
             {
                 std::vector<int> collided;
@@ -56,42 +62,64 @@ namespace GravityFun
 
                 auto shared_velocity = read_buffer[i].Velocity * read_buffer[i].Mass;
                 double shared_mass = read_buffer[i].Mass;
-                for (const auto& j : collided)
+                for (const auto j : collided)
                 {
-                    shared_velocity = read_buffer[j].Velocity * read_buffer[j].Mass;
-                    shared_mass += read_buffer[j].Mass;
+                    if (!LastCollisions[i - begin].contains(j))
+                    {
+                        shared_velocity = read_buffer[j].Velocity * read_buffer[j].Mass;
+                        shared_mass += read_buffer[j].Mass;
+                    }
                 }
                 shared_velocity /= shared_mass;
 
                 Math::Vec2 rebound(0, 0);
+                int rebound_count = 0;
+                std::set<int> new_collisions;
                 for (int n = 0; n < collided.size(); n++)
                 {
-                    double rebound_d = (
-                        read_buffer[collided[n]].Velocity.GetDotProduct(collision_direction[n])
-                        - read_buffer[i].Velocity.GetDotProduct(collision_direction[n])
-                    ) * 0.5;
-                    rebound += collision_direction[n] * rebound_d;
+                    int j = collided[n];
+                    new_collisions.insert(j);
+                    if (!LastCollisions[i - begin].contains(j))
+                    {
+                        auto col_dir = collision_direction[n];
+                        double rebound_d = (
+                            read_buffer[j].Velocity.GetDotProduct(col_dir)
+                            - read_buffer[i].Velocity.GetDotProduct(col_dir)
+                        ) * 0.5;
+                        rebound += col_dir * rebound_d;
+                        rebound_count++;
+                    }
 
                     // Update position to exit collision
-                    auto distance2d = write_buffer[i].Position - read_buffer[collided[n]].Position; // from other, towards i
+                    auto distance2d = write_buffer[i].Position - read_buffer[j].Position; // from other, towards i
                     double distance = distance2d.GetMagnitude();
-                    if (distance < collision_threshold[n])
+                    double col_threshold = collision_threshold[n];
+                    if (distance < col_threshold)
                     {
-                        write_buffer[i].Position =
-                            read_buffer[collided[n]].Position
-                            + distance2d.GetNormalized() * collision_threshold[n];
+                        write_buffer[i].Position
+                            += distance2d.GetNormalized()
+                                * ((col_threshold - distance) * 0.5); // Each object goes 0.5 => successful exit
                     }
                 }
-                rebound /= collided.size();
-
-                write_buffer[i].Velocity = shared_velocity + rebound * 0.5 * GameManager::COLLISION_PRESERVE;
+                LastCollisions[i - begin] = std::move(new_collisions);
+                if (rebound_count != 0)
+                {
+                    rebound /= rebound_count;
+                    write_buffer[i].Velocity = shared_velocity + rebound * 0.5 * GameManager::COLLISION_PRESERVE;
+                }
+                else // Collided but no new collision
+                {
+                    auto prev_pos = read_buffer[i].Position - read_buffer[i].Velocity * Pass1->TimeDiff;
+                    write_buffer[i].Velocity = (write_buffer[i].Position - prev_pos) / Pass1->TimeDiff;
+                }
             }
         }
         else // Normal mode (forces, motion, and border collision)
         {
             auto& last_time = Hybrid ? Pass1->LastTime : LastTime;
+            auto& time_diff = Hybrid ? Pass1->TimeDiff : TimeDiff;
             auto time = std::chrono::steady_clock::now();
-            double time_diff = std::min(
+            time_diff = std::min(
                 GameManager::MAX_TIME_DIFF,
                 std::chrono::duration<double>(time - last_time).count()
             ) * _GameManager->GetTimeMultiplier();

@@ -3,6 +3,9 @@
 #include "GravityFun.dec.h"
 
 #include <chrono>
+#include <memory>
+#include <set>
+#include <vector>
 
 namespace GravityFun
 {
@@ -23,7 +26,6 @@ namespace GravityFun
         Physics(Physics&&) = delete;
         Physics& operator=(const Physics&) = delete;
         Physics& operator=(Physics&&) = delete;
-
     protected:
         virtual void OnRun() override;
     private:
@@ -34,5 +36,11 @@ namespace GravityFun
         Physics * Pass1;
 
         std::chrono::steady_clock::time_point LastTime;
+        double TimeDiff;
+
+        /// Used for collision mode
+        int LastObjectCount;
+        /// Used for collision mode
+        std::vector<std::set<int>> LastCollisions;
     };
 }
