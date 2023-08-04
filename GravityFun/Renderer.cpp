@@ -65,7 +65,10 @@ namespace GravityFun
                 / (std::log2(GameManager::MAX_TIME_MULTIPLIER) - std::log2(GameManager::MIN_TIME_MULTIPLIER));
         };
         AnimationTargetFunctions[&EnergySavingSlider] = [this]() {
-            return 1.0 - _GameManager->GetEnergySavingFactor();
+            return 1.0 - (
+                (_GameManager->GetEnergySavingFactor() - GameManager::MIN_ENERGY_SAVING_FACTOR)
+                / (GameManager::MAX_ENERGY_SAVING_FACTOR - GameManager::MIN_ENERGY_SAVING_FACTOR)
+            );
         };
 
         for (auto& item : AnimatedModels)

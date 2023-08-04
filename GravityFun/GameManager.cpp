@@ -142,10 +142,15 @@ namespace GravityFun
             || _Window->GetPressedKeys().contains(GLFW_KEY_KP_ADD)
             || _Window->GetRepeatedKeys().contains(GLFW_KEY_KP_ADD))
         {
-            auto temp = EnergySavingFactor - 0.125;
-            if (0 <= temp)
+            auto temp = EnergySavingFactor - ENERGY_SAVING_FACTOR_STEP;
+            if (MIN_ENERGY_SAVING_FACTOR <= temp)
             {
                 EnergySavingFactor = temp;
+                _EnergySaver->SetEnergySavingFactor(EnergySavingFactor);
+            }
+            else
+            {
+                EnergySavingFactor = MIN_ENERGY_SAVING_FACTOR;
                 _EnergySaver->SetEnergySavingFactor(EnergySavingFactor);
             }
         }
@@ -154,10 +159,15 @@ namespace GravityFun
             || _Window->GetPressedKeys().contains(GLFW_KEY_KP_SUBTRACT)
             || _Window->GetRepeatedKeys().contains(GLFW_KEY_KP_SUBTRACT))
         {
-            auto temp = EnergySavingFactor + 0.125;
-            if (temp <= 1)
+            auto temp = EnergySavingFactor + ENERGY_SAVING_FACTOR_STEP;
+            if (temp <= MAX_ENERGY_SAVING_FACTOR)
             {
                 EnergySavingFactor = temp;
+                _EnergySaver->SetEnergySavingFactor(EnergySavingFactor);
+            }
+            else
+            {
+                EnergySavingFactor = MAX_ENERGY_SAVING_FACTOR;
                 _EnergySaver->SetEnergySavingFactor(EnergySavingFactor);
             }
         }

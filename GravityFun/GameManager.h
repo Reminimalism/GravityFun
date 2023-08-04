@@ -52,7 +52,10 @@ namespace GravityFun
         static constexpr double DEFAULT_TIME_MULTIPLIER = 1;
         static constexpr double MIN_TIME_MULTIPLIER = 0.125;
         static constexpr double MAX_TIME_MULTIPLIER = 8;
-        static constexpr double DEFAULT_ENERGY_SAVING_FACTOR = 0;
+        static constexpr double DEFAULT_ENERGY_SAVING_FACTOR = 0.125;
+        static constexpr double ENERGY_SAVING_FACTOR_STEP = 0.0625;
+        static constexpr double MIN_ENERGY_SAVING_FACTOR = 0;
+        static constexpr double MAX_ENERGY_SAVING_FACTOR = 0.5;
 
         /// @brief Used for physics. See also: COLLISION_PRESERVE
         static constexpr double COLLISION_LOSS = 0.2;
