@@ -8,7 +8,8 @@
 namespace GravityFun
 {
     Physics::Physics(std::shared_ptr<GameManager> game_manager, int number, int total, Physics * pass1)
-        : _GameManager(game_manager), Number(number), Total(total), Hybrid(pass1 != nullptr), Pass1(pass1), LastObjectCount(0)
+        : _GameManager(game_manager), Number(number), Total(total), Hybrid(pass1 != nullptr), Pass1(pass1),
+        LastTimeDiff(0), TimeDebt(0), LastObjectCount(0)
     {
         LastTime = std::chrono::steady_clock::now();
     }
@@ -118,11 +119,19 @@ namespace GravityFun
         {
             auto& last_time = Hybrid ? Pass1->LastTime : LastTime;
             auto& time_diff = Hybrid ? Pass1->TimeDiff : TimeDiff;
+            auto& last_time_diff = Hybrid ? Pass1->LastTimeDiff : LastTimeDiff;
+            auto& time_debt = Hybrid ? Pass1->TimeDebt : TimeDebt;
             auto time = std::chrono::steady_clock::now();
-            time_diff = std::min(
+            double actual_time_diff = std::min(
                 GameManager::MAX_TIME_DIFF,
                 std::chrono::duration<double>(time - last_time).count()
             ) * _GameManager->GetTimeMultiplier();
+            double offset = actual_time_diff + time_debt - last_time_diff;
+            time_diff = last_time_diff + GameManager::TIME_STRICTNESS * offset;
+            if (time_diff <= 0)
+                time_diff = actual_time_diff * GameManager::MIN_TIME_DIFF_SCALE;
+            last_time_diff = time_diff;
+            time_debt += actual_time_diff - time_diff;
             last_time = time;
 
             bool g = _GameManager->IsRelativeGravityOn();

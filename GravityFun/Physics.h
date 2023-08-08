@@ -37,6 +37,8 @@ namespace GravityFun
 
         std::chrono::steady_clock::time_point LastTime;
         double TimeDiff;
+        double LastTimeDiff;
+        double TimeDebt;
 
         /// Used for collision mode
         int LastObjectCount;

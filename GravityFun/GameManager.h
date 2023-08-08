@@ -71,6 +71,15 @@ namespace GravityFun
         static constexpr double MOUSE_BRAKING_ACCELERATION = 1;
         /// @brief Used for physics.
         static constexpr double MAX_TIME_DIFF = 0.1;
+        /// @brief Used for physics.
+        ///        Represents how much the time diff is close to the actual time diff.
+        ///
+        /// DO NOT SET IT TO 0. Must be in (0, 1].
+        static constexpr double TIME_STRICTNESS = 0.1;
+        /// @brief Used for physics.
+        ///        This is the scale applied to the actual time diff
+        ///        to prevent negative soft time diff.
+        static constexpr double MIN_TIME_DIFF_SCALE = 0.5;
 
         int GetObjectsCount();
         double GetTimeMultiplier();
