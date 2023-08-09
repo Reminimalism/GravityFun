@@ -128,7 +128,7 @@ namespace GravityFun
             ) * _GameManager->GetTimeMultiplier();
             double offset = actual_time_diff + time_debt - last_time_diff;
             double correction = std::abs(offset / actual_time_diff); // Scales small changes down to reduce oscillation
-            correction = GameManager::TIME_STRICTNESS * offset * correction;
+            correction = _GameManager->GetTimeStrictness() * offset * correction;
             if (std::abs(correction) > std::abs(offset))
                 correction = offset;
             time_diff = last_time_diff + correction;

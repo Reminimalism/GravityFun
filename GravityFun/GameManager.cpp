@@ -16,6 +16,7 @@ namespace GravityFun
     GameManager::GameManager(std::shared_ptr<Window> window, std::shared_ptr<EnergySaver> energy_saver)
         : _Window(window), _EnergySaver(energy_saver),
           _PhysicsPassNotifier(new PhysicsPassNotifier(this)), MainThreadId(std::this_thread::get_id()),
+          TimeStrictness(1), PhysicsUpdates(1), PhysicsUpdatesSoft(1),
           ObjectsCount(DEFAULT_OBJECTS_COUNT), TimeMultiplier(DEFAULT_TIME_MULTIPLIER),
           EnergySavingFactor(DEFAULT_ENERGY_SAVING_FACTOR),
           DownGravityOn(false), RelativeGravityOn(false),
@@ -185,10 +186,15 @@ namespace GravityFun
         MouseLeft = _Window->GetMouseLeftButton();
         MouseRight = _Window->GetMouseRightButton();
         MouseMiddle = _Window->GetMouseMiddleButton();
+
+        PhysicsUpdatesSoft += (PhysicsUpdates - PhysicsUpdatesSoft) * TIME_STRICTNESS_UPDATE_ALPHA;
+        TimeStrictness = 1 / (double)PhysicsUpdatesSoft;
+        PhysicsUpdates = 0;
     }
 
     void GameManager::PhysicsPassNotify()
     {
+        PhysicsUpdates++;
         PhysicsPass1ReadBufferIndex = PhysicsPass2WriteBufferIndex;
     }
 
@@ -216,6 +222,11 @@ namespace GravityFun
     std::vector<FloatingObject>& GameManager::GetPhysicsPass2WriteBuffer()
     {
         return ObjectBuffers[PhysicsPass2WriteBufferIndex];
+    }
+
+    double GameManager::GetTimeStrictness()
+    {
+        return TimeStrictness;
     }
 
     int GameManager::GetObjectsCount()

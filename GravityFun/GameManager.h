@@ -72,14 +72,16 @@ namespace GravityFun
         /// @brief Used for physics.
         static constexpr double MAX_TIME_DIFF = 0.1;
         /// @brief Used for physics.
-        ///        Represents how much the time diff is close to the actual time diff.
-        ///
-        /// DO NOT SET IT TO 0. Must be in (0, 1].
-        static constexpr double TIME_STRICTNESS = 0.1;
-        /// @brief Used for physics.
         ///        This is the scale applied to the actual time diff
         ///        to prevent negative soft time diff.
         static constexpr double MIN_TIME_DIFF_SCALE = 0.5;
+
+        /// @brief How quickly the time strictness changes
+        static constexpr double TIME_STRICTNESS_UPDATE_ALPHA = 0.05;
+
+        /// @brief Used for physics.
+        ///        Represents how much the time diff is close to the actual time diff.
+        double GetTimeStrictness();
 
         int GetObjectsCount();
         double GetTimeMultiplier();
@@ -120,6 +122,11 @@ namespace GravityFun
         static constexpr int PhysicsPass2ReadBufferIndex = 1;
         /// 2 or 0 (!= RenderBufferIndex)
         int PhysicsPass2WriteBufferIndex;
+
+        /// DO NOT SET IT TO 0. Must be in (0, 1].
+        double TimeStrictness;
+        int PhysicsUpdates;
+        double PhysicsUpdatesSoft;
 
         int ObjectsCount;
         double TimeMultiplier;
