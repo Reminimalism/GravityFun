@@ -127,7 +127,11 @@ namespace GravityFun
                 std::chrono::duration<double>(time - last_time).count()
             ) * _GameManager->GetTimeMultiplier();
             double offset = actual_time_diff + time_debt - last_time_diff;
-            time_diff = last_time_diff + GameManager::TIME_STRICTNESS * offset;
+            double correction = std::abs(offset / actual_time_diff);
+            correction = GameManager::TIME_STRICTNESS * offset * correction;
+            if (std::abs(correction) > std::abs(offset))
+                correction = offset;
+            time_diff = last_time_diff + correction;
             if (time_diff <= 0)
                 time_diff = actual_time_diff * GameManager::MIN_TIME_DIFF_SCALE;
             last_time_diff = time_diff;
