@@ -127,16 +127,16 @@ namespace GravityFun
         Random _Random;
 
         std::vector<FloatingObject> ObjectBuffers[3];
-        /// 0 or 2
+        /// @brief 0 or 2
         int RenderBufferIndex;
-        /// 0 or 2 (first RenderBufferIndex, then PhysicsPass2WriteBufferIndex)
+        /// @brief 0 or 2 (first RenderBufferIndex, then PhysicsPass2WriteBufferIndex)
         int PhysicsPass1ReadBufferIndex;
         static constexpr int PhysicsPass1WriteBufferIndex = 1;
         static constexpr int PhysicsPass2ReadBufferIndex = 1;
-        /// 2 or 0 (!= RenderBufferIndex)
+        /// @brief 2 or 0 (!= RenderBufferIndex)
         int PhysicsPass2WriteBufferIndex;
 
-        /// DO NOT SET IT TO 0. Must be in (0, 1].
+        /// @brief DO NOT SET IT TO 0. Must be in (0, 1].
         double TimeStrictness;
         int PhysicsUpdates;
         double PhysicsUpdatesSoft;
@@ -144,6 +144,7 @@ namespace GravityFun
         int ObjectsCount;
         double TimeMultiplier;
         double PhysicsFidelity;
+        /// @brief Minimum allowed physics execution timespan
         double EnergySavingMinExec;
         bool DownGravityOn;
         bool RelativeGravityOn;

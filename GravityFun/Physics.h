@@ -40,9 +40,9 @@ namespace GravityFun
         double LastTimeDiff;
         double TimeDebt;
 
-        /// Used for collision mode
+        /// @brief Used for collision mode
         int LastObjectCount;
-        /// Used for collision mode
+        /// @brief Used for collision mode
         std::vector<std::set<int>> LastCollisions;
     };
 }
