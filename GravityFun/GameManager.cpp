@@ -15,10 +15,11 @@ namespace GravityFun
 
     GameManager::GameManager(std::shared_ptr<Window> window, std::shared_ptr<EnergySaver> energy_saver)
         : _Window(window), _EnergySaver(energy_saver),
+          RootGroup(nullptr), PhysicsPass1(nullptr), PhysicsPass2(nullptr),
           _PhysicsPassNotifier(new PhysicsPassNotifier(this)), MainThreadId(std::this_thread::get_id()),
           TimeStrictness(1), PhysicsUpdates(1), PhysicsUpdatesSoft(1),
           ObjectsCount(DEFAULT_OBJECTS_COUNT), TimeMultiplier(DEFAULT_TIME_MULTIPLIER),
-          EnergySavingFactor(DEFAULT_ENERGY_SAVING_FACTOR),
+          PhysicsFidelity(DEFAULT_PHYSICS_FIDELITY),
           DownGravityOn(false), RelativeGravityOn(false),
           VariableMassOn(false),
           BorderCollisionOn(true), ObjectCollisionOn(false),
@@ -41,7 +42,20 @@ namespace GravityFun
                 );
             }
         }
-        _EnergySaver->SetEnergySavingFactor(EnergySavingFactor);
+        EnergySavingMaxExec = 1 - PhysicsFidelity;
+        EnergySavingMaxExec = EnergySavingMaxExec * EnergySavingMaxExec * EnergySavingMaxExec;
+        _EnergySaver->SetIdlingTime(0);
+    }
+
+    void GameManager::SetGroups(
+            LoopScheduler::Group * root_group,
+            LoopScheduler::Group * physics_pass1,
+            LoopScheduler::Group * physics_pass2
+        )
+    {
+        RootGroup = root_group;
+        PhysicsPass1 = physics_pass1;
+        PhysicsPass2 = physics_pass2;
     }
 
     bool GameManager::CanRun()
@@ -138,39 +152,50 @@ namespace GravityFun
         }
 
         // Energy saving factor
-        if (_Window->GetPressedKeys().contains(GLFW_KEY_EQUAL)
-            || _Window->GetRepeatedKeys().contains(GLFW_KEY_EQUAL)
-            || _Window->GetPressedKeys().contains(GLFW_KEY_KP_ADD)
-            || _Window->GetRepeatedKeys().contains(GLFW_KEY_KP_ADD))
-        {
-            auto temp = EnergySavingFactor - ENERGY_SAVING_FACTOR_STEP;
-            if (MIN_ENERGY_SAVING_FACTOR <= temp)
-            {
-                EnergySavingFactor = temp;
-                _EnergySaver->SetEnergySavingFactor(EnergySavingFactor);
-            }
-            else
-            {
-                EnergySavingFactor = MIN_ENERGY_SAVING_FACTOR;
-                _EnergySaver->SetEnergySavingFactor(EnergySavingFactor);
-            }
-        }
         if (_Window->GetPressedKeys().contains(GLFW_KEY_MINUS)
             || _Window->GetRepeatedKeys().contains(GLFW_KEY_MINUS)
             || _Window->GetPressedKeys().contains(GLFW_KEY_KP_SUBTRACT)
             || _Window->GetRepeatedKeys().contains(GLFW_KEY_KP_SUBTRACT))
         {
-            auto temp = EnergySavingFactor + ENERGY_SAVING_FACTOR_STEP;
-            if (temp <= MAX_ENERGY_SAVING_FACTOR)
+            auto temp = PhysicsFidelity - PHYSICS_FIDELITY_STEP;
+            if (MIN_PHYSICS_FIDELITY <= temp)
             {
-                EnergySavingFactor = temp;
-                _EnergySaver->SetEnergySavingFactor(EnergySavingFactor);
+                PhysicsFidelity = temp;
             }
             else
             {
-                EnergySavingFactor = MAX_ENERGY_SAVING_FACTOR;
-                _EnergySaver->SetEnergySavingFactor(EnergySavingFactor);
+                PhysicsFidelity = MIN_PHYSICS_FIDELITY;
             }
+            EnergySavingMaxExec = 1 - PhysicsFidelity;
+            EnergySavingMaxExec = EnergySavingMaxExec * EnergySavingMaxExec * EnergySavingMaxExec;
+        }
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_EQUAL)
+            || _Window->GetRepeatedKeys().contains(GLFW_KEY_EQUAL)
+            || _Window->GetPressedKeys().contains(GLFW_KEY_KP_ADD)
+            || _Window->GetRepeatedKeys().contains(GLFW_KEY_KP_ADD))
+        {
+            auto temp = PhysicsFidelity + PHYSICS_FIDELITY_STEP;
+            if (temp <= MAX_PHYSICS_FIDELITY)
+            {
+                PhysicsFidelity = temp;
+            }
+            else
+            {
+                PhysicsFidelity = MAX_PHYSICS_FIDELITY;
+            }
+            EnergySavingMaxExec = 1 - PhysicsFidelity;
+            EnergySavingMaxExec = EnergySavingMaxExec * EnergySavingMaxExec * EnergySavingMaxExec;
+        }
+
+        double mexec = EnergySavingMaxExec * RootGroup->PredictLowerExecutionTime();
+        double exec = PhysicsPass1->PredictHigherExecutionTime() + PhysicsPass2->PredictHigherExecutionTime();
+        if (mexec <= exec)
+        {
+            _EnergySaver->SetIdlingTime(0);
+        }
+        else
+        {
+            _EnergySaver->SetIdlingTime((mexec - exec) * 0.5);
         }
 
         // Update AspectRatio, BorderX, and BorderY
@@ -194,8 +219,8 @@ namespace GravityFun
 
     void GameManager::PhysicsPassNotify()
     {
-        PhysicsUpdates++;
         PhysicsPass1ReadBufferIndex = PhysicsPass2WriteBufferIndex;
+        PhysicsUpdates++;
     }
 
     std::shared_ptr<GameManager::PhysicsPassNotifier> GameManager::GetPhysicsPassNotifier()
@@ -237,9 +262,9 @@ namespace GravityFun
     {
         return TimeMultiplier;
     }
-    double GameManager::GetEnergySavingFactor()
+    double GameManager::GetPhysicsFidelity()
     {
-        return EnergySavingFactor;
+        return PhysicsFidelity;
     }
     bool GameManager::IsDownGravityOn()
     {

@@ -114,6 +114,8 @@ int main()
         })
     ));
 
+    game_manager->SetGroups(root_group.get(), physics_pass1_group.get(), physics_pass2_group.get());
+
     LoopScheduler::Loop loop(root_group);
 
     loop.Run(concurrency);

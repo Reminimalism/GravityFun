@@ -3,30 +3,30 @@
 namespace GravityFun
 {
     EnergySaver::EnergySaver(double energy_saving_factor)
-        : EnergySavingFactor(energy_saving_factor)
+        : IdlingTime(energy_saving_factor)
     {
-        if (EnergySavingFactor < 0)
-            EnergySavingFactor = 0;
-        if (EnergySavingFactor > 1)
-            EnergySavingFactor = 1;
+        if (IdlingTime < 0)
+            IdlingTime = 0;
+        if (IdlingTime > 1)
+            IdlingTime = 1;
     }
 
-    void EnergySaver::SetEnergySavingFactor(double value)
+    void EnergySaver::SetIdlingTime(double value)
     {
-        EnergySavingFactor = value;
-        if (EnergySavingFactor < 0)
-            EnergySavingFactor = 0;
-        if (EnergySavingFactor > 1)
-            EnergySavingFactor = 1;
+        IdlingTime = value;
+        if (IdlingTime < 0)
+            IdlingTime = 0;
+        if (IdlingTime > 1)
+            IdlingTime = 1;
     }
-    double EnergySaver::GetEnergySavingFactor()
+    double EnergySaver::GetIdlingTime()
     {
-        return EnergySavingFactor;
+        return IdlingTime;
     }
 
     void EnergySaver::OnRun()
     {
-        if (EnergySavingFactor == 0)
+        if (IdlingTime == 0)
             return;
         auto g = GetParent();
         if (g == nullptr)
@@ -34,6 +34,8 @@ namespace GravityFun
         g = g->GetParent();
         if (g == nullptr)
             return;
-        Idle(EnergySavingFactor * g->PredictLowerRemainingExecutionTime());
+        double t = g->PredictLowerRemainingExecutionTime(); // Includes EnergySaver time itself
+        if (IdlingTime < t)
+            Idle(IdlingTime);
     }
 }

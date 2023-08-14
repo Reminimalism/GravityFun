@@ -11,6 +11,7 @@
 
 namespace GravityFun
 {
+    /// @brief The SetGroups function MUST be called before running the module.
     class GameManager final : public LoopScheduler::Module
     {
     public:
@@ -25,7 +26,19 @@ namespace GravityFun
         };
         friend PhysicsPassNotifier;
 
-        explicit GameManager(std::shared_ptr<Window>, std::shared_ptr<EnergySaver>);
+        explicit GameManager(
+            std::shared_ptr<Window>,
+            std::shared_ptr<EnergySaver>
+        );
+
+        /// @brief MUST be called before running.
+        ///        The owner must take care of the group lifetimes
+        ///        as these are not a smart pointers.
+        void SetGroups(
+            LoopScheduler::Group * root_group,
+            LoopScheduler::Group * physics_pass1,
+            LoopScheduler::Group * physics_pass2
+        );
 
         GameManager(const GameManager&) = delete;
         GameManager(GameManager&&) = delete;
@@ -52,10 +65,10 @@ namespace GravityFun
         static constexpr double DEFAULT_TIME_MULTIPLIER = 1;
         static constexpr double MIN_TIME_MULTIPLIER = 0.125;
         static constexpr double MAX_TIME_MULTIPLIER = 8;
-        static constexpr double DEFAULT_ENERGY_SAVING_FACTOR = 0.125;
-        static constexpr double ENERGY_SAVING_FACTOR_STEP = 0.0625;
-        static constexpr double MIN_ENERGY_SAVING_FACTOR = 0;
-        static constexpr double MAX_ENERGY_SAVING_FACTOR = 0.5;
+        static constexpr double DEFAULT_PHYSICS_FIDELITY = 0.75;
+        static constexpr double PHYSICS_FIDELITY_STEP = 0.0625;
+        static constexpr double MIN_PHYSICS_FIDELITY = 0;
+        static constexpr double MAX_PHYSICS_FIDELITY = 1;
 
         /// @brief Used for physics. See also: COLLISION_PRESERVE
         static constexpr double COLLISION_LOSS = 0.2;
@@ -86,7 +99,7 @@ namespace GravityFun
         int GetObjectsCount();
         double GetTimeMultiplier();
         /// @return In range [0, 1]
-        double GetEnergySavingFactor();
+        double GetPhysicsFidelity();
         bool IsDownGravityOn();
         bool IsRelativeGravityOn();
         bool IsVariableMassOn();
@@ -108,6 +121,9 @@ namespace GravityFun
         std::shared_ptr<Window> _Window;
         std::shared_ptr<PhysicsPassNotifier> _PhysicsPassNotifier;
         std::shared_ptr<EnergySaver> _EnergySaver;
+        LoopScheduler::Group * RootGroup;
+        LoopScheduler::Group * PhysicsPass1;
+        LoopScheduler::Group * PhysicsPass2;
 
         std::thread::id MainThreadId;
 
@@ -130,7 +146,8 @@ namespace GravityFun
 
         int ObjectsCount;
         double TimeMultiplier;
-        double EnergySavingFactor;
+        double PhysicsFidelity;
+        double EnergySavingMaxExec;
         bool DownGravityOn;
         bool RelativeGravityOn;
         bool VariableMassOn;
