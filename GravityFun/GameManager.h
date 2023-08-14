@@ -62,7 +62,7 @@ namespace GravityFun
         static constexpr double DEFAULT_TIME_MULTIPLIER = 1;
         static constexpr double MIN_TIME_MULTIPLIER = 0.125;
         static constexpr double MAX_TIME_MULTIPLIER = 8;
-        static constexpr double DEFAULT_PHYSICS_FIDELITY = 0.5;
+        static constexpr double DEFAULT_PHYSICS_FIDELITY = 0.625;
         static constexpr double PHYSICS_FIDELITY_STEP = 0.0625;
         static constexpr double MIN_PHYSICS_FIDELITY = 0;
         static constexpr double MAX_PHYSICS_FIDELITY = 1;
