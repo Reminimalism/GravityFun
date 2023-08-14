@@ -34,8 +34,6 @@ namespace GravityFun
         g = g->GetParent();
         if (g == nullptr)
             return;
-        double t = g->PredictLowerRemainingExecutionTime(); // Includes EnergySaver time itself
-        if (IdlingTime < t)
-            Idle(IdlingTime);
+        Idle(IdlingTime);
     }
 }

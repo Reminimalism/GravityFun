@@ -42,8 +42,8 @@ namespace GravityFun
                 );
             }
         }
-        EnergySavingMaxExec = 1 - PhysicsFidelity;
-        EnergySavingMaxExec = EnergySavingMaxExec * EnergySavingMaxExec * EnergySavingMaxExec;
+        EnergySavingMinExec = 1 - PhysicsFidelity;
+        EnergySavingMinExec = EnergySavingMinExec * EnergySavingMinExec * EnergySavingMinExec;
         _EnergySaver->SetIdlingTime(0);
     }
 
@@ -166,8 +166,8 @@ namespace GravityFun
             {
                 PhysicsFidelity = MIN_PHYSICS_FIDELITY;
             }
-            EnergySavingMaxExec = 1 - PhysicsFidelity;
-            EnergySavingMaxExec = EnergySavingMaxExec * EnergySavingMaxExec * EnergySavingMaxExec;
+            EnergySavingMinExec = 1 - PhysicsFidelity;
+            EnergySavingMinExec = EnergySavingMinExec * EnergySavingMinExec * EnergySavingMinExec;
         }
         if (_Window->GetPressedKeys().contains(GLFW_KEY_EQUAL)
             || _Window->GetRepeatedKeys().contains(GLFW_KEY_EQUAL)
@@ -183,19 +183,19 @@ namespace GravityFun
             {
                 PhysicsFidelity = MAX_PHYSICS_FIDELITY;
             }
-            EnergySavingMaxExec = 1 - PhysicsFidelity;
-            EnergySavingMaxExec = EnergySavingMaxExec * EnergySavingMaxExec * EnergySavingMaxExec;
+            EnergySavingMinExec = 1 - PhysicsFidelity;
+            EnergySavingMinExec = EnergySavingMinExec * EnergySavingMinExec * EnergySavingMinExec;
         }
 
-        double mexec = EnergySavingMaxExec * RootGroup->PredictLowerExecutionTime();
+        double min_exec = EnergySavingMinExec * RootGroup->PredictLowerExecutionTime();
         double exec = PhysicsPass1->PredictHigherExecutionTime() + PhysicsPass2->PredictHigherExecutionTime();
-        if (mexec <= exec)
+        if (min_exec <= exec)
         {
             _EnergySaver->SetIdlingTime(0);
         }
         else
         {
-            _EnergySaver->SetIdlingTime((mexec - exec) * 0.5);
+            _EnergySaver->SetIdlingTime(min_exec - exec);
         }
 
         // Update AspectRatio, BorderX, and BorderY

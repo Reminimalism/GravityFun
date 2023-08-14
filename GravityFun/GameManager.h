@@ -26,10 +26,7 @@ namespace GravityFun
         };
         friend PhysicsPassNotifier;
 
-        explicit GameManager(
-            std::shared_ptr<Window>,
-            std::shared_ptr<EnergySaver>
-        );
+        explicit GameManager(std::shared_ptr<Window>, std::shared_ptr<EnergySaver>);
 
         /// @brief MUST be called before running.
         ///        The owner must take care of the group lifetimes
@@ -65,7 +62,7 @@ namespace GravityFun
         static constexpr double DEFAULT_TIME_MULTIPLIER = 1;
         static constexpr double MIN_TIME_MULTIPLIER = 0.125;
         static constexpr double MAX_TIME_MULTIPLIER = 8;
-        static constexpr double DEFAULT_PHYSICS_FIDELITY = 0.75;
+        static constexpr double DEFAULT_PHYSICS_FIDELITY = 0.5;
         static constexpr double PHYSICS_FIDELITY_STEP = 0.0625;
         static constexpr double MIN_PHYSICS_FIDELITY = 0;
         static constexpr double MAX_PHYSICS_FIDELITY = 1;
@@ -147,7 +144,7 @@ namespace GravityFun
         int ObjectsCount;
         double TimeMultiplier;
         double PhysicsFidelity;
-        double EnergySavingMaxExec;
+        double EnergySavingMinExec;
         bool DownGravityOn;
         bool RelativeGravityOn;
         bool VariableMassOn;
