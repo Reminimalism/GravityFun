@@ -7,7 +7,6 @@
 #include <array>
 #include <chrono>
 #include <memory>
-#include <set>
 
 namespace GravityFun
 {
@@ -43,6 +42,6 @@ namespace GravityFun
         double TimeDebt;
 
         /// @brief Used for collision mode
-        std::array<std::set<int>, GameManager::MAX_OBJECTS_COUNT> LastCollisions;
+        std::array<std::array<int, GameManager::MAX_COLLISION_COUNT + 1>, GameManager::MAX_OBJECTS_COUNT> LastCollisions;
     };
 }

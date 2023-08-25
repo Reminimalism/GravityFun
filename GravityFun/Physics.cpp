@@ -61,10 +61,19 @@ namespace GravityFun
 
                 auto shared_velocity = read_buffer[i].Velocity * read_buffer[i].Mass;
                 double shared_mass = read_buffer[i].Mass;
+                int last_col_i = 0;
                 for (int n = 0; n < collisions_count; n++)
                 {
                     int j = collided[n];
-                    if (!LastCollisions[i].contains(j))
+                    while (LastCollisions[i][last_col_i] < j) // No range condition required
+                    {
+                        last_col_i++;
+                    }
+                    if (LastCollisions[i][last_col_i] == j) // No range condition required
+                    {
+                        last_col_i++;
+                    }
+                    else
                     {
                         shared_velocity = read_buffer[j].Velocity * read_buffer[j].Mass;
                         shared_mass += read_buffer[j].Mass;
@@ -74,12 +83,21 @@ namespace GravityFun
 
                 Math::Vec2 rebound(0, 0);
                 int rebound_count = 0;
-                std::set<int> new_collisions;
+                std::array<int, GameManager::MAX_COLLISION_COUNT + 1> new_collisions;
+                last_col_i = 0;
                 for (int n = 0; n < collisions_count; n++)
                 {
                     int j = collided[n];
-                    new_collisions.insert(j);
-                    if (!LastCollisions[i].contains(j))
+                    new_collisions[n] = j;
+                    while (LastCollisions[i][last_col_i] < j) // No range condition required
+                    {
+                        last_col_i++;
+                    }
+                    if (LastCollisions[i][last_col_i] == j) // No range condition required
+                    {
+                        last_col_i++;
+                    }
+                    else
                     {
                         auto col_dir = collision_direction[n];
                         double rebound_d = (
@@ -101,7 +119,12 @@ namespace GravityFun
                                 * ((col_threshold - distance) * 0.5); // Each object goes 0.5 => successful exit
                     }
                 }
-                LastCollisions[i] = std::move(new_collisions);
+                // The new_collisions[collisions_count] is guaranteed to be in range
+                // as the array size is GameManager::MAX_COLLISION_COUNT + 1.
+                // This last value is to make sure the loops that check LastCollisions
+                // do not go out of range, without needing the extra range condition.
+                new_collisions[collisions_count] = GameManager::MAX_OBJECTS_COUNT + 1;
+                LastCollisions[i] = new_collisions;
                 if (rebound_count != 0)
                 {
                     rebound /= rebound_count;
