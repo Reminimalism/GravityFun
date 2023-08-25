@@ -19,6 +19,15 @@
 
 #include "../LoopScheduler/LoopScheduler/LoopScheduler.h"
 
+#ifndef GRAVITYFUN_DEBUG
+    #define GRAVITYFUN_DEBUG 0
+#endif
+
+#if GRAVITYFUN_DEBUG
+#include <iostream>
+#include <string>
+#endif
+
 /*
 
 Loop with threads=hardware_concurrency + 1:
@@ -48,6 +57,9 @@ Renderer contains
 
 namespace GravityFun
 {
+#if GRAVITYFUN_DEBUG
+    inline void Log(std::string message = "", std::string end = "\n") { std::cout << message << end; }
+#endif
     class Window;
     class MouseEventManager;
     class ShaderProgram;

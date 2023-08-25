@@ -5,6 +5,7 @@
 #include "Random.h"
 #include "FloatingObject.h"
 
+#include <chrono>
 #include <memory>
 #include <thread>
 #include <vector>
@@ -162,5 +163,10 @@ namespace GravityFun
         bool MouseMiddle;
 
         void PhysicsPassNotify();
+
+#if GRAVITYFUN_DEBUG
+        std::chrono::steady_clock::time_point PhysicsRateLastTime;
+        int PhysicsRateCounter;
+#endif
     };
 }

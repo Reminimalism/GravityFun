@@ -45,6 +45,10 @@ namespace GravityFun
         EnergySavingMinExec = 1 - PhysicsFidelity;
         EnergySavingMinExec = EnergySavingMinExec * EnergySavingMinExec * EnergySavingMinExec;
         _EnergySaver->SetIdlingTime(0);
+#if GRAVITYFUN_DEBUG
+        PhysicsRateLastTime = std::chrono::steady_clock::now();
+        PhysicsRateCounter = 0;
+#endif
     }
 
     void GameManager::SetGroups(
@@ -215,12 +219,27 @@ namespace GravityFun
         PhysicsUpdatesSoft += (PhysicsUpdates - PhysicsUpdatesSoft) * TIME_STRICTNESS_UPDATE_ALPHA;
         TimeStrictness = 1 / (double)PhysicsUpdatesSoft;
         PhysicsUpdates = 0;
+
+#if GRAVITYFUN_DEBUG
+        std::chrono::duration<double> diff = std::chrono::steady_clock::now() - PhysicsRateLastTime;
+        double d = diff.count();
+        if (d > 1)
+        {
+            Log(std::string("Physics update rate: ") + std::to_string(PhysicsRateCounter / d));
+            PhysicsRateLastTime = std::chrono::steady_clock::now();
+            PhysicsRateCounter = 0;
+        }
+#endif
     }
 
     void GameManager::PhysicsPassNotify()
     {
         PhysicsPass1ReadBufferIndex = PhysicsPass2WriteBufferIndex;
         PhysicsUpdates++;
+
+#if GRAVITYFUN_DEBUG
+        PhysicsRateCounter++;
+#endif
     }
 
     std::shared_ptr<GameManager::PhysicsPassNotifier> GameManager::GetPhysicsPassNotifier()
