@@ -12,6 +12,12 @@ namespace GravityFun
         LastTimeDiff(0), TimeDebt(0)
     {
         LastTime = std::chrono::steady_clock::now();
+        for (int i = 0; i < GameManager::MAX_OBJECTS_COUNT; i++)
+        {
+            // To make sure the loops/conditions that check LastCollisions do not go out of range,
+            // without needing the extra range condition.
+            LastCollisions[i][0] = GameManager::MAX_OBJECTS_COUNT + 1;
+        }
     }
 
     void Physics::OnRun()
