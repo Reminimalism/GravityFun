@@ -192,7 +192,7 @@ namespace GravityFun
 
         // Render objects
         const auto& buffer = _GameManager->GetRenderBuffer();
-        for (int i = 0; i < buffer.size(); i++)
+        for (int i = 0; i < _GameManager->GetObjectsCount(); i++)
         {
             const auto& item = buffer[i];
             std::uniform_real_distribution<double> distribution(0.5, 1.0);

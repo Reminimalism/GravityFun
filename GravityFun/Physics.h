@@ -2,10 +2,12 @@
 
 #include "GravityFun.dec.h"
 
+#include "GameManager.h"
+
+#include <array>
 #include <chrono>
 #include <memory>
 #include <set>
-#include <vector>
 
 namespace GravityFun
 {
@@ -41,8 +43,6 @@ namespace GravityFun
         double TimeDebt;
 
         /// @brief Used for collision mode
-        int LastObjectCount;
-        /// @brief Used for collision mode
-        std::vector<std::set<int>> LastCollisions;
+        std::array<std::set<int>, GameManager::MAX_OBJECTS_COUNT> LastCollisions;
     };
 }

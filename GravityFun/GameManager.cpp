@@ -30,7 +30,6 @@ namespace GravityFun
     {
         for (int i = 0; i < 3; i++)
         {
-            ObjectBuffers[i].resize(ObjectsCount);
             for (int j = 0; j < ObjectsCount; j++)
             {
                 ObjectBuffers[i][j] = FloatingObject(
@@ -94,6 +93,7 @@ namespace GravityFun
             ObjectCollisionOn = !ObjectCollisionOn;
 
         // Objects count
+        int last_objects_count = ObjectsCount;
         if (_Window->GetPressedKeys().contains(GLFW_KEY_UP)
             || _Window->GetRepeatedKeys().contains(GLFW_KEY_UP))
         {
@@ -116,15 +116,9 @@ namespace GravityFun
         }
 
         // Update buffers based on objects count
-        if (ObjectsCount < ObjectBuffers[RenderBufferIndex].size())
+        if (last_objects_count < ObjectsCount)
         {
-            for (int i = 0; i < 3; i++)
-                ObjectBuffers[i].resize(ObjectsCount);
-        }
-        if (ObjectBuffers[RenderBufferIndex].size() < ObjectsCount)
-        {
-            int new_count = ObjectsCount - ObjectBuffers[RenderBufferIndex].size();
-            for (int i = 0; i < new_count; i++)
+            for (int i = last_objects_count; i < ObjectsCount; i++)
             {
                 double mass = VariableMassOn ? _Random.GetDouble(MIN_MASS, MAX_MASS) : DEFAULT_MASS;
                 FloatingObject new_obj(
@@ -135,7 +129,7 @@ namespace GravityFun
                     )
                 );
                 for (int j = 0; j < 3; j++)
-                    ObjectBuffers[j].push_back(new_obj);
+                    ObjectBuffers[j][i] = new_obj;
             }
         }
 
@@ -247,23 +241,23 @@ namespace GravityFun
         return _PhysicsPassNotifier;
     }
 
-    const std::vector<FloatingObject>& GameManager::GetRenderBuffer()
+    const std::array<FloatingObject, GameManager::MAX_OBJECTS_COUNT>& GameManager::GetRenderBuffer()
     {
         return ObjectBuffers[RenderBufferIndex];
     }
-    const std::vector<FloatingObject>& GameManager::GetPhysicsPass1ReadBuffer()
+    const std::array<FloatingObject, GameManager::MAX_OBJECTS_COUNT>& GameManager::GetPhysicsPass1ReadBuffer()
     {
         return ObjectBuffers[PhysicsPass1ReadBufferIndex];
     }
-    std::vector<FloatingObject>& GameManager::GetPhysicsPass1WriteBuffer()
+    std::array<FloatingObject, GameManager::MAX_OBJECTS_COUNT>& GameManager::GetPhysicsPass1WriteBuffer()
     {
         return ObjectBuffers[PhysicsPass1WriteBufferIndex];
     }
-    const std::vector<FloatingObject>& GameManager::GetPhysicsPass2ReadBuffer()
+    const std::array<FloatingObject, GameManager::MAX_OBJECTS_COUNT>& GameManager::GetPhysicsPass2ReadBuffer()
     {
         return ObjectBuffers[PhysicsPass2ReadBufferIndex];
     }
-    std::vector<FloatingObject>& GameManager::GetPhysicsPass2WriteBuffer()
+    std::array<FloatingObject, GameManager::MAX_OBJECTS_COUNT>& GameManager::GetPhysicsPass2WriteBuffer()
     {
         return ObjectBuffers[PhysicsPass2WriteBufferIndex];
     }

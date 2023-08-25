@@ -9,7 +9,7 @@ namespace GravityFun
 {
     Physics::Physics(std::shared_ptr<GameManager> game_manager, int number, int total, Physics * pass1)
         : _GameManager(game_manager), Number(number), Total(total), Hybrid(pass1 != nullptr), Pass1(pass1),
-        LastTimeDiff(0), TimeDebt(0), LastObjectCount(0)
+        LastTimeDiff(0), TimeDebt(0)
     {
         LastTime = std::chrono::steady_clock::now();
     }
@@ -23,22 +23,19 @@ namespace GravityFun
             _GameManager->GetPhysicsPass2WriteBuffer()
             : _GameManager->GetPhysicsPass1WriteBuffer();
 
-        const int begin = Number * read_buffer.size() / Total;
-        const int end = (Number + 1) * read_buffer.size() / Total;
+        const int objects_count = _GameManager->GetObjectsCount();
+        const int begin = Number * objects_count / Total;
+        const int end = (Number + 1) * objects_count / Total;
 
         if (Hybrid && _GameManager->IsObjectCollisionOn()) // Object collision mode
         {
-            if (LastObjectCount != read_buffer.size())
-            {
-                LastObjectCount = read_buffer.size();
-                LastCollisions.resize(end - begin);
-            }
+            std::array<int, GameManager::MAX_COLLISION_COUNT> collided;
+            std::array<Math::Vec2, GameManager::MAX_COLLISION_COUNT> collision_direction;
+            std::array<double, GameManager::MAX_COLLISION_COUNT> collision_threshold;
             for (int i = begin; i < end; i++)
             {
-                std::vector<int> collided;
-                std::vector<Math::Vec2> collision_direction;
-                std::vector<double> collision_threshold;
-                for (int j = 0; j < read_buffer.size(); j++)
+                int collisions_count = 0;
+                for (int j = 0; j < objects_count && collisions_count < GameManager::MAX_COLLISION_COUNT; j++)
                 {
                     if (i == j)
                         continue;
@@ -47,15 +44,16 @@ namespace GravityFun
                     double threshold = (read_buffer[i].Mass + read_buffer[j].Mass) * GameManager::MASS_TO_RADIUS;
                     if (distance < threshold)
                     {
-                        collided.push_back(j);
-                        collision_direction.push_back(distance2d.GetNormalized());
-                        collision_threshold.push_back(threshold);
+                        collided[collisions_count] = j;
+                        collision_direction[collisions_count] = distance2d.GetNormalized();
+                        collision_threshold[collisions_count] = threshold;
+                        collisions_count++;
                     }
                 }
 
                 write_buffer[i].Position = read_buffer[i].Position;
 
-                if (collided.size() == 0)
+                if (collisions_count == 0)
                 {
                     write_buffer[i].Velocity = read_buffer[i].Velocity;
                     continue;
@@ -63,9 +61,10 @@ namespace GravityFun
 
                 auto shared_velocity = read_buffer[i].Velocity * read_buffer[i].Mass;
                 double shared_mass = read_buffer[i].Mass;
-                for (const auto j : collided)
+                for (int n = 0; n < collisions_count; n++)
                 {
-                    if (!LastCollisions[i - begin].contains(j))
+                    int j = collided[n];
+                    if (!LastCollisions[i].contains(j))
                     {
                         shared_velocity = read_buffer[j].Velocity * read_buffer[j].Mass;
                         shared_mass += read_buffer[j].Mass;
@@ -76,11 +75,11 @@ namespace GravityFun
                 Math::Vec2 rebound(0, 0);
                 int rebound_count = 0;
                 std::set<int> new_collisions;
-                for (int n = 0; n < collided.size(); n++)
+                for (int n = 0; n < collisions_count; n++)
                 {
                     int j = collided[n];
                     new_collisions.insert(j);
-                    if (!LastCollisions[i - begin].contains(j))
+                    if (!LastCollisions[i].contains(j))
                     {
                         auto col_dir = collision_direction[n];
                         double rebound_d = (
@@ -102,7 +101,7 @@ namespace GravityFun
                                 * ((col_threshold - distance) * 0.5); // Each object goes 0.5 => successful exit
                     }
                 }
-                LastCollisions[i - begin] = std::move(new_collisions);
+                LastCollisions[i] = std::move(new_collisions);
                 if (rebound_count != 0)
                 {
                     rebound /= rebound_count;
@@ -154,7 +153,7 @@ namespace GravityFun
                 Math::Vec2 net_acceleration(0, 0);
                 if (g)
                 {
-                    for (int j = 0; j < read_buffer.size(); j++)
+                    for (int j = 0; j < objects_count; j++)
                     {
                         if (i == j)
                             continue;

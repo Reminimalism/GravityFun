@@ -5,10 +5,10 @@
 #include "Random.h"
 #include "FloatingObject.h"
 
+#include <array>
 #include <chrono>
 #include <memory>
 #include <thread>
-#include <vector>
 
 namespace GravityFun
 {
@@ -46,12 +46,6 @@ namespace GravityFun
         /// @brief This module has to be added after the two physics pass.
         std::shared_ptr<PhysicsPassNotifier> GetPhysicsPassNotifier();
 
-        const std::vector<FloatingObject>& GetRenderBuffer();
-        const std::vector<FloatingObject>& GetPhysicsPass1ReadBuffer();
-        std::vector<FloatingObject>& GetPhysicsPass1WriteBuffer();
-        const std::vector<FloatingObject>& GetPhysicsPass2ReadBuffer();
-        std::vector<FloatingObject>& GetPhysicsPass2WriteBuffer();
-
         static constexpr int DEFAULT_OBJECTS_COUNT = 10;
         static constexpr int MIN_OBJECTS_COUNT = 0;
         static constexpr int MAX_OBJECTS_COUNT = 1000;
@@ -68,6 +62,14 @@ namespace GravityFun
         static constexpr double MIN_PHYSICS_FIDELITY = 0;
         static constexpr double MAX_PHYSICS_FIDELITY = 1;
 
+        const std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetRenderBuffer();
+        const std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetPhysicsPass1ReadBuffer();
+        std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetPhysicsPass1WriteBuffer();
+        const std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetPhysicsPass2ReadBuffer();
+        std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetPhysicsPass2WriteBuffer();
+
+        /// @brief Used for physics.
+        static constexpr int MAX_COLLISION_COUNT = 24;
         /// @brief Used for physics. See also: COLLISION_PRESERVE
         static constexpr double COLLISION_LOSS = 0.2;
         /// @brief Used for physics. COLLISION_PRESERVE = 1 - COLLISION_LOSS
@@ -127,7 +129,6 @@ namespace GravityFun
 
         Random _Random;
 
-        std::vector<FloatingObject> ObjectBuffers[3];
         /// @brief 0 or 2
         int RenderBufferIndex;
         /// @brief 0 or 2 (first RenderBufferIndex, then PhysicsPass2WriteBufferIndex)
@@ -161,6 +162,8 @@ namespace GravityFun
         bool MouseLeft;
         bool MouseRight;
         bool MouseMiddle;
+
+        std::array<FloatingObject, MAX_OBJECTS_COUNT> ObjectBuffers[3];
 
         void PhysicsPassNotify();
 
