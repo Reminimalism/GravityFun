@@ -2,6 +2,7 @@
 
 #include "GameManager.h"
 
+#include <algorithm>
 #include <cmath>
 #include <utility>
 
@@ -89,7 +90,7 @@ namespace GravityFun
 
                 Math::Vec2 rebound(0, 0);
                 int rebound_count = 0;
-                std::array<int, GameManager::MAX_COLLISION_COUNT + 1> new_collisions;
+                int new_collisions[GameManager::MAX_COLLISION_COUNT + 1];
                 last_col_i = 0;
                 for (int n = 0; n < collisions_count; n++)
                 {
@@ -125,12 +126,12 @@ namespace GravityFun
                                 * ((col_threshold - distance) * 0.5); // Each object goes 0.5 => successful exit
                     }
                 }
-                // The new_collisions[collisions_count] is guaranteed to be in range
+                // The new_collisions[collisions_count] is guaranteed to have no range issues
                 // as the array size is GameManager::MAX_COLLISION_COUNT + 1.
-                // This last value is to make sure the loops that check LastCollisions
+                // This last value is to make sure the loops/conditions that check LastCollisions
                 // do not go out of range, without needing the extra range condition.
                 new_collisions[collisions_count] = GameManager::MAX_OBJECTS_COUNT + 1;
-                LastCollisions[i] = new_collisions;
+                std::copy(std::begin(new_collisions), std::end(new_collisions), LastCollisions[i].begin());
                 if (rebound_count != 0)
                 {
                     rebound /= rebound_count;
