@@ -30,16 +30,18 @@
 
 /*
 
-Loop with threads=hardware_concurrency + 1:
+(concurrency = hardware_concurrency by default)
+
+Loop with threads=concurrency:
     SequentialGroup root:
         GameManager
         ParallelGroup physics & renderer:
-            Renderer
+            Renderer (idles on thread block)
             SequentialGroup* physics passes:
                 ParallelGroup physics pass 1:
-                    Physics[hardware_concurrency] // force/motion updates.
+                    Physics[concurrency] // force/motion updates.
                 ParallelGroup physics pass 2:
-                    Physics[hardware_concurrency] // resolves collisions between objects if on, else, normal force/motion update.
+                    Physics[concurrency] // resolves collisions between objects if on, else, normal force/motion update.
                 GameManager.PhysicsPassNotifier
                 EnergySaver
 
