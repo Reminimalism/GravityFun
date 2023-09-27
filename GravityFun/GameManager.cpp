@@ -23,6 +23,7 @@ namespace GravityFun
           DownGravityOn(false), RelativeGravityOn(false),
           VariableMassOn(false),
           BorderCollisionOn(true), ObjectCollisionOn(false),
+          MotionBlurOn(true),
           BorderX(1), BorderY(1),
           PreviousRenderBufferIndex(0), RenderBufferIndex(1),
           PhysicsPass1ReadBufferIndex(1), PhysicsPass2WriteBufferIndex(2),
