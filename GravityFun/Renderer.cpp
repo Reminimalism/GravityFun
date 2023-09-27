@@ -177,23 +177,6 @@ namespace GravityFun
         for (auto& item : animations_to_remove)
             ActiveToggleAnimations.erase(item);
 
-        // Render hints
-        glUniform4f(ProgramColorUniform, 1, 1, 1, 1);
-        float start = -(HINT_ICON_SIZE + HINT_ICON_PADDING) * (AnimatedModels.size() - 1);
-        for (int i = 0; i < AnimatedModels.size(); i++)
-        {
-            auto model = AnimatedModels[i];
-            auto model_matrix =
-                Math::Matrix4x4::Translation(start + i * (HINT_ICON_SIZE + HINT_ICON_PADDING) * 2, 1 - HINT_ICON_SIZE - HINT_ICON_PADDING, 0)
-                * Math::Matrix4x4::Scale(
-                    HINT_ICON_SIZE,
-                    HINT_ICON_SIZE,
-                    1
-                );
-            glUniformMatrix4fv(ProgramModelUniform, 1, GL_FALSE, model_matrix.GetData());
-            model->Render();
-        }
-
         // Render objects
         const auto& previous_buffer = _GameManager->GetPreviousRenderBuffer();
         const auto& buffer = _GameManager->GetRenderBuffer();
@@ -249,6 +232,23 @@ namespace GravityFun
             }
 
             Circle.Render();
+        }
+
+        // Render hints
+        glUniform4f(ProgramColorUniform, 1, 1, 1, 1);
+        float start = -(HINT_ICON_SIZE + HINT_ICON_PADDING) * (AnimatedModels.size() - 1);
+        for (int i = 0; i < AnimatedModels.size(); i++)
+        {
+            auto model = AnimatedModels[i];
+            auto model_matrix =
+                Math::Matrix4x4::Translation(start + i * (HINT_ICON_SIZE + HINT_ICON_PADDING) * 2, 1 - HINT_ICON_SIZE - HINT_ICON_PADDING, 0)
+                * Math::Matrix4x4::Scale(
+                    HINT_ICON_SIZE,
+                    HINT_ICON_SIZE,
+                    1
+                );
+            glUniformMatrix4fv(ProgramModelUniform, 1, GL_FALSE, model_matrix.GetData());
+            model->Render();
         }
 
         auto token = StartIdling(0, PredictLowerExecutionTime());
