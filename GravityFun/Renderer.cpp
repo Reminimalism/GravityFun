@@ -74,7 +74,8 @@ namespace GravityFun
         for (auto& item : AnimatedModels)
             item->SetState(AnimationTargetFunctions[item]());
 
-        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     Renderer::~Renderer()
@@ -174,7 +175,7 @@ namespace GravityFun
             ActiveToggleAnimations.erase(item);
 
         // Render hints
-        glUniform3f(ProgramColorUniform, 1, 1, 1);
+        glUniform4f(ProgramColorUniform, 1, 1, 1, 1);
         float start = -(HINT_ICON_SIZE + HINT_ICON_PADDING) * (AnimatedModels.size() - 1);
         for (int i = 0; i < AnimatedModels.size(); i++)
         {
@@ -198,15 +199,6 @@ namespace GravityFun
             const auto& item_previous = previous_buffer[i];
             const auto& item = buffer[i];
 
-            std::uniform_real_distribution<double> distribution(0.5, 1.0);
-            std::mt19937 mt(i * 3 + 0);
-            double r = distribution(mt);
-            mt.seed(i * 3 + 1);
-            double g = distribution(mt);
-            mt.seed(i * 3 + 2);
-            double b = distribution(mt);
-            glUniform3f(ProgramColorUniform, r, g, b);
-
             auto pos = (item_previous.Position + item.Position) * 0.5;
             auto d = (item.Position - item_previous.Position);
             auto stretch = d.GetMagnitude() * 0.5;
@@ -225,6 +217,16 @@ namespace GravityFun
                     1
                 );
             glUniformMatrix4fv(ProgramModelUniform, 1, GL_FALSE, model_matrix.GetData());
+
+            std::uniform_real_distribution<double> distribution(0.5, 1.0);
+            std::mt19937 mt(i * 3 + 0);
+            double r = distribution(mt);
+            mt.seed(i * 3 + 1);
+            double g = distribution(mt);
+            mt.seed(i * 3 + 2);
+            double b = distribution(mt);
+            double a = 1 / (1 + (stretch / (item.Mass * GameManager::MASS_TO_RADIUS)));
+            glUniform4f(ProgramColorUniform, r, g, b, a);
 
             Circle.Render();
         }

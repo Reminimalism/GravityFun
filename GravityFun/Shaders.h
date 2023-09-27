@@ -21,11 +21,10 @@ const char * const SimpleFragmentShaderSource = R"(
 
 out vec4 FragColor;
 
-uniform vec3 Color;
+uniform vec4 Color;
 
 void main()
 {
-    vec3 color = Color;
-    FragColor = vec4(color, 1.0);
+    FragColor = Color;
 }
 )";
