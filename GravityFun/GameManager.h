@@ -106,6 +106,7 @@ namespace GravityFun
         bool IsVariableMassOn();
         bool IsBorderCollisionOn();
         bool IsObjectCollisionOn();
+        bool IsMotionBlurOn();
         double GetBorderX();
         double GetBorderY();
         /// @brief Width / Height
@@ -156,6 +157,7 @@ namespace GravityFun
         bool VariableMassOn;
         bool BorderCollisionOn;
         bool ObjectCollisionOn;
+        bool MotionBlurOn;
         double BorderX;
         double BorderY;
         /// @brief Width / Height

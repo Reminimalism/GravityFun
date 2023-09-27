@@ -44,6 +44,7 @@ namespace GravityFun
         AnimatedModel VariableMassToggle;
         AnimatedModel BorderCollisionToggle;
         AnimatedModel ObjectCollisionToggle;
+        AnimatedModel MotionBlurToggle;
 
         AnimatedModel ObjectsCountSlider;
         AnimatedModel TimeMultiplierSlider;

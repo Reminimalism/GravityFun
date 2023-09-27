@@ -30,6 +30,7 @@ namespace GravityFun
           VariableMassToggle(BufferGeneration::GenerateVariableMassToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
           BorderCollisionToggle(BufferGeneration::GenerateBorderCollisionToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
           ObjectCollisionToggle(BufferGeneration::GenerateObjectCollisionToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
+          MotionBlurToggle(BufferGeneration::GenerateMotionBlurToggle(CIRCLE_RESOLUTION, HINT_ICON_Z)),
           ObjectsCountSlider(BufferGeneration::GenerateObjectsCountSlider(CIRCLE_RESOLUTION, HINT_ICON_Z)),
           TimeMultiplierSlider(BufferGeneration::GenerateTimeMultiplierSlider(
                 CIRCLE_RESOLUTION,
@@ -51,6 +52,7 @@ namespace GravityFun
         AnimatedModels.push_back(&VariableMassToggle);
         AnimatedModels.push_back(&BorderCollisionToggle);
         AnimatedModels.push_back(&ObjectCollisionToggle);
+        AnimatedModels.push_back(&MotionBlurToggle);
         AnimatedModels.push_back(&ObjectsCountSlider);
         AnimatedModels.push_back(&TimeMultiplierSlider);
         AnimatedModels.push_back(&EnergySavingSlider);
@@ -59,6 +61,7 @@ namespace GravityFun
         AnimationTargetFunctions[&VariableMassToggle] = [this]() { return _GameManager->IsVariableMassOn() ? 1 : 0; };
         AnimationTargetFunctions[&BorderCollisionToggle] = [this]() { return _GameManager->IsBorderCollisionOn() ? 1 : 0; };
         AnimationTargetFunctions[&ObjectCollisionToggle] = [this]() { return _GameManager->IsObjectCollisionOn() ? 1 : 0; };
+        AnimationTargetFunctions[&MotionBlurToggle] = [this]() { return _GameManager->IsMotionBlurOn() ? 1 : 0; };
         AnimationTargetFunctions[&ObjectsCountSlider] = [this]() { return (float)_GameManager->GetObjectsCount() / GameManager::MAX_OBJECTS_COUNT; };
         AnimationTargetFunctions[&TimeMultiplierSlider] = [this]() {
             return (std::log2(_GameManager->GetTimeMultiplier()) - std::log2(GameManager::MIN_TIME_MULTIPLIER))
@@ -199,25 +202,6 @@ namespace GravityFun
             const auto& item_previous = previous_buffer[i];
             const auto& item = buffer[i];
 
-            auto pos = (item_previous.Position + item.Position) * 0.5;
-            auto d = (item.Position - item_previous.Position);
-            auto stretch = d.GetMagnitude() * 0.5;
-            double angle = 0;
-            if (stretch != 0)
-            {
-                d = d.GetNormalized();
-                angle = d.y < 0 ? -std::acos(d.x) : std::acos(d.x);
-            }
-            auto model_matrix =
-                Math::Matrix4x4::Translation(pos.x, pos.y, 0)
-                * Math::Matrix4x4::RotationAroundZ(angle)
-                * Math::Matrix4x4::Scale(
-                    item.Mass * GameManager::MASS_TO_RADIUS + stretch,
-                    item.Mass * GameManager::MASS_TO_RADIUS,
-                    1
-                );
-            glUniformMatrix4fv(ProgramModelUniform, 1, GL_FALSE, model_matrix.GetData());
-
             std::uniform_real_distribution<double> distribution(0.5, 1.0);
             std::mt19937 mt(i * 3 + 0);
             double r = distribution(mt);
@@ -225,8 +209,44 @@ namespace GravityFun
             double g = distribution(mt);
             mt.seed(i * 3 + 2);
             double b = distribution(mt);
-            double a = 1 / (1 + (stretch / (item.Mass * GameManager::MASS_TO_RADIUS)));
-            glUniform4f(ProgramColorUniform, r, g, b, a);
+
+            if (_GameManager->IsMotionBlurOn())
+            {
+                auto pos = (item_previous.Position + item.Position) * 0.5;
+                auto d = (item.Position - item_previous.Position);
+                auto stretch = d.GetMagnitude() * 0.5;
+                double angle = 0;
+                if (stretch != 0)
+                {
+                    d = d.GetNormalized();
+                    angle = d.y < 0 ? -std::acos(d.x) : std::acos(d.x);
+                }
+                auto model_matrix =
+                    Math::Matrix4x4::Translation(pos.x, pos.y, 0)
+                    * Math::Matrix4x4::RotationAroundZ(angle)
+                    * Math::Matrix4x4::Scale(
+                        item.Mass * GameManager::MASS_TO_RADIUS + stretch,
+                        item.Mass * GameManager::MASS_TO_RADIUS,
+                        1
+                    );
+                glUniformMatrix4fv(ProgramModelUniform, 1, GL_FALSE, model_matrix.GetData());
+
+                double a = 1 / (1 + (stretch / (item.Mass * GameManager::MASS_TO_RADIUS)));
+                glUniform4f(ProgramColorUniform, r, g, b, a);
+            }
+            else
+            {
+                auto model_matrix =
+                    Math::Matrix4x4::Translation(item.Position.x, item.Position.y, 0)
+                    * Math::Matrix4x4::Scale(
+                        item.Mass * GameManager::MASS_TO_RADIUS,
+                        item.Mass * GameManager::MASS_TO_RADIUS,
+                        1
+                    );
+                glUniformMatrix4fv(ProgramModelUniform, 1, GL_FALSE, model_matrix.GetData());
+
+                glUniform4f(ProgramColorUniform, r, g, b, 1);
+            }
 
             Circle.Render();
         }

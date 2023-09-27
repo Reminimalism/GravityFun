@@ -1004,6 +1004,96 @@ namespace GravityFun::BufferGeneration
         return std::make_tuple(vertices0, vertices1, indices);
     }
 
+
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateMotionBlurToggle(
+            int circle_resolution,
+            float z
+        )
+    {
+        if (circle_resolution < 8)
+            circle_resolution = 8;
+
+        constexpr float object_size = 0.2;
+        constexpr float object_spread = 0.75;
+
+        std::vector<float> vertices0;
+        std::vector<float> vertices1;
+        std::vector<unsigned int> indices;
+
+        int next_index = 0;
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(-0.5, 0.75), Math::Vec2(0.5, 0.75),
+            0.1, Math::Vec2(0.25, 0.4),
+            Math::Vec2(-0.6, 0.75), Math::Vec2(0.6, 0.75),
+            0.1, Math::Vec2(0.25, 0.4)
+        );
+
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            circle_resolution,
+            -object_spread, 0, object_size,
+            -object_spread, 0, object_size
+        );
+
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            circle_resolution,
+            0, 0, object_size,
+            0, 0, object_size
+        );
+
+        generate_animated_circle(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            circle_resolution,
+            object_spread, 0, object_size,
+            object_spread, 0, object_size
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(0, 0), Math::Vec2(-0.01, 0),
+            object_size, Math::Vec2(0, 0),
+            Math::Vec2(0, 0), Math::Vec2(-object_spread, 0),
+            object_size, Math::Vec2(0, 0)
+        );
+
+        generate_animated_arrow(
+            next_index,
+            vertices0,
+            vertices1,
+            indices,
+            z,
+            Math::Vec2(0, 0), Math::Vec2(0.01, 0),
+            object_size, Math::Vec2(0, 0),
+            Math::Vec2(0, 0), Math::Vec2(object_spread, 0),
+            object_size, Math::Vec2(0, 0)
+        );
+
+        return std::make_tuple(vertices0, vertices1, indices);
+    }
+
     std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateObjectsCountSlider(
             int circle_resolution,
             float z

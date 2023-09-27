@@ -93,6 +93,9 @@ namespace GravityFun
         if (_Window->GetPressedKeys().contains(GLFW_KEY_C)
             || _Window->GetPressedKeys().contains(GLFW_KEY_5))
             ObjectCollisionOn = !ObjectCollisionOn;
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_SLASH)
+            || _Window->GetPressedKeys().contains(GLFW_KEY_6))
+            MotionBlurOn = !MotionBlurOn;
 
         // Objects count
         int last_objects_count = ObjectsCount;
@@ -304,6 +307,10 @@ namespace GravityFun
     bool GameManager::IsObjectCollisionOn()
     {
         return ObjectCollisionOn;
+    }
+    bool GameManager::IsMotionBlurOn()
+    {
+        return MotionBlurOn;
     }
     double GameManager::GetBorderX()
     {

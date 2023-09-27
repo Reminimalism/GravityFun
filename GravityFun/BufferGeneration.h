@@ -83,6 +83,17 @@ namespace GravityFun::BufferGeneration
         float z = 0.1
     );
 
+    /// @brief Generates a reversed energy saving bar (energy consumption bar).
+    /// @param circle_resolution The number of vertices around the circle. The minimum is 8.
+    /// @param z The z of vertices.
+    /// @return 2 vertex lists of vec3 position and vec3 normal, for 2 states, and triangles' indices.
+    ///           Normal is (0, 0, 1) in all vertices.
+    ///           Position xy is in range [-1, 1].
+    std::tuple<std::vector<float>, std::vector<float>, std::vector<unsigned int>> GenerateMotionBlurToggle(
+        int circle_resolution,
+        float z = 0.1
+    );
+
     /// @param circle_resolution The number of vertices around the circle. The minimum is 8.
     /// @param z The z of vertices.
     /// @return 2 vertex lists of vec3 position and vec3 normal, for 2 states, and triangles' indices.
