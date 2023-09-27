@@ -24,11 +24,11 @@ namespace GravityFun
           VariableMassOn(false),
           BorderCollisionOn(true), ObjectCollisionOn(false),
           BorderX(1), BorderY(1),
-          RenderBufferIndex(0),
-          PhysicsPass1ReadBufferIndex(0), PhysicsPass2WriteBufferIndex(2),
+          PreviousRenderBufferIndex(0), RenderBufferIndex(1),
+          PhysicsPass1ReadBufferIndex(1), PhysicsPass2WriteBufferIndex(2),
           LoopScheduler::Module(false, nullptr, nullptr, true)
     {
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 4; i++)
         {
             for (int j = 0; j < ObjectsCount; j++)
             {
@@ -72,7 +72,10 @@ namespace GravityFun
             GetLoop()->Stop();
         _Window->Update();
 
-        std::swap(RenderBufferIndex, PhysicsPass2WriteBufferIndex);
+        auto temp_index = PreviousRenderBufferIndex;
+        PreviousRenderBufferIndex = RenderBufferIndex;
+        RenderBufferIndex = PhysicsPass2WriteBufferIndex;
+        PhysicsPass2WriteBufferIndex = temp_index;
         PhysicsPass1ReadBufferIndex = RenderBufferIndex;
 
         // Toggles
@@ -128,7 +131,7 @@ namespace GravityFun
                         _Random.GetDouble(-BorderY + mass * MASS_TO_RADIUS, BorderY - mass * MASS_TO_RADIUS)
                     )
                 );
-                for (int j = 0; j < 3; j++)
+                for (int j = 0; j < 4; j++)
                     ObjectBuffers[j][i] = new_obj;
             }
         }
@@ -241,6 +244,10 @@ namespace GravityFun
         return _PhysicsPassNotifier;
     }
 
+    const std::array<FloatingObject, GameManager::MAX_OBJECTS_COUNT>& GameManager::GetPreviousRenderBuffer()
+    {
+        return ObjectBuffers[PreviousRenderBufferIndex];
+    }
     const std::array<FloatingObject, GameManager::MAX_OBJECTS_COUNT>& GameManager::GetRenderBuffer()
     {
         return ObjectBuffers[RenderBufferIndex];

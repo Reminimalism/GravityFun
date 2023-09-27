@@ -62,6 +62,7 @@ namespace GravityFun
         static constexpr double MIN_PHYSICS_FIDELITY = 0;
         static constexpr double MAX_PHYSICS_FIDELITY = 1;
 
+        const std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetPreviousRenderBuffer();
         const std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetRenderBuffer();
         const std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetPhysicsPass1ReadBuffer();
         std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetPhysicsPass1WriteBuffer();
@@ -129,13 +130,15 @@ namespace GravityFun
 
         Random _Random;
 
-        /// @brief 0 or 2
+        /// @brief [0, 2]
+        int PreviousRenderBufferIndex;
+        /// @brief [0, 2] ((PreviousRenderBufferIndex + 1) % 3)
         int RenderBufferIndex;
-        /// @brief 0 or 2 (first RenderBufferIndex, then PhysicsPass2WriteBufferIndex)
+        /// @brief [0, 2] (first RenderBufferIndex, then PhysicsPass2WriteBufferIndex)
         int PhysicsPass1ReadBufferIndex;
-        static constexpr int PhysicsPass1WriteBufferIndex = 1;
-        static constexpr int PhysicsPass2ReadBufferIndex = 1;
-        /// @brief 2 or 0 (!= RenderBufferIndex)
+        static constexpr int PhysicsPass1WriteBufferIndex = 3;
+        static constexpr int PhysicsPass2ReadBufferIndex = 3;
+        /// @brief [0, 2] ((RenderBufferIndex + 1) % 3)
         int PhysicsPass2WriteBufferIndex;
 
         /// @brief DO NOT SET IT TO 0. Must be in (0, 1].
@@ -163,7 +166,7 @@ namespace GravityFun
         bool MouseRight;
         bool MouseMiddle;
 
-        std::array<FloatingObject, MAX_OBJECTS_COUNT> ObjectBuffers[3];
+        std::array<FloatingObject, MAX_OBJECTS_COUNT> ObjectBuffers[4];
 
         void PhysicsPassNotify();
 
