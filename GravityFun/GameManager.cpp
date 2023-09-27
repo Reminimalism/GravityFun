@@ -28,18 +28,17 @@ namespace GravityFun
           PhysicsPass1ReadBufferIndex(1), PhysicsPass2WriteBufferIndex(2),
           LoopScheduler::Module(false, nullptr, nullptr, true)
     {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < ObjectsCount; i++)
         {
-            for (int j = 0; j < ObjectsCount; j++)
-            {
-                ObjectBuffers[i][j] = FloatingObject(
-                    DEFAULT_MASS,
-                    Math::Vec2(
-                        _Random.GetDouble(-BorderX + DEFAULT_MASS * MASS_TO_RADIUS, BorderX - DEFAULT_MASS * MASS_TO_RADIUS),
-                        _Random.GetDouble(-BorderY + DEFAULT_MASS * MASS_TO_RADIUS, BorderY - DEFAULT_MASS * MASS_TO_RADIUS)
-                    )
-                );
-            }
+            FloatingObject new_obj(
+                DEFAULT_MASS,
+                Math::Vec2(
+                    _Random.GetDouble(-BorderX + DEFAULT_MASS * MASS_TO_RADIUS, BorderX - DEFAULT_MASS * MASS_TO_RADIUS),
+                    _Random.GetDouble(-BorderY + DEFAULT_MASS * MASS_TO_RADIUS, BorderY - DEFAULT_MASS * MASS_TO_RADIUS)
+                )
+            );
+            for (int j = 0; j < 4; j++)
+                ObjectBuffers[j][i] = new_obj;
         }
         EnergySavingMinExec = 1 - PhysicsFidelity;
         EnergySavingMinExec = EnergySavingMinExec * EnergySavingMinExec * EnergySavingMinExec;
