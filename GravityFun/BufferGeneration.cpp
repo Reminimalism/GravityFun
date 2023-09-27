@@ -1029,9 +1029,9 @@ namespace GravityFun::BufferGeneration
             indices,
             z,
             Math::Vec2(-0.5, 0.75), Math::Vec2(0.5, 0.75),
-            0.1, Math::Vec2(0.25, 0.4),
+            0.1, Math::Vec2(0.3, 0.4),
             Math::Vec2(-0.6, 0.75), Math::Vec2(0.6, 0.75),
-            0.1, Math::Vec2(0.25, 0.4)
+            0.1, Math::Vec2(0.25, 0.6)
         );
 
         generate_animated_circle(
