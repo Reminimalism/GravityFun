@@ -40,9 +40,10 @@ Loop with threads=concurrency:
             SequentialGroup* physics passes:
                 ParallelGroup physics pass 1:
                     Physics[concurrency] // force/motion updates.
+                GameManager.PhysicsPass1Notifier
                 ParallelGroup physics pass 2:
                     Physics[concurrency] // resolves collisions between objects if on, else, normal force/motion update.
-                GameManager.PhysicsPassNotifier
+                GameManager.PhysicsPass2Notifier
                 EnergySaver
 
 GameManager uses Window

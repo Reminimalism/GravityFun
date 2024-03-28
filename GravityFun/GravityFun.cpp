@@ -95,8 +95,9 @@ int main()
     std::shared_ptr<LoopScheduler::SequentialGroup> physics_passes_group(new LoopScheduler::SequentialGroup(
         std::vector<LoopScheduler::SequentialGroupMember>({
             physics_pass1_group,
+            game_manager->GetPhysicsPass1Notifier(),
             physics_pass2_group,
-            game_manager->GetPhysicsPassNotifier(),
+            game_manager->GetPhysicsPass2Notifier(),
             energy_saver
         })
     ));

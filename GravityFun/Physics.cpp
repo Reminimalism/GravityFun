@@ -30,6 +30,8 @@ namespace GravityFun
             _GameManager->GetPhysicsPass2WriteBuffer()
             : _GameManager->GetPhysicsPass1WriteBuffer();
 
+        const auto& object_mapper = _GameManager->GetObjectMapper();
+
         const int objects_count = _GameManager->GetObjectsCount();
         const int begin = Number * objects_count / Total;
         const int end = (Number + 1) * objects_count / Total;
@@ -42,21 +44,24 @@ namespace GravityFun
             for (int i = begin; i < end; i++)
             {
                 int collisions_count = 0;
-                for (int j = 0; j < objects_count && collisions_count < GameManager::MAX_COLLISION_COUNT; j++)
-                {
-                    if (i == j)
-                        continue;
-                    auto distance2d = read_buffer[i].Position - read_buffer[j].Position; // from j, towards i
-                    double distance = distance2d.GetMagnitude();
-                    double threshold = (read_buffer[i].Mass + read_buffer[j].Mass) * GameManager::MASS_TO_RADIUS;
-                    if (distance < threshold)
+                object_mapper.VisitObjects(read_buffer[i].Position, 2 * GameManager::MAX_MASS * GameManager::MASS_TO_RADIUS,
+                    [&](int j) -> bool
                     {
-                        collided[collisions_count] = j;
-                        collision_direction[collisions_count] = distance2d.GetNormalized();
-                        collision_threshold[collisions_count] = threshold;
-                        collisions_count++;
+                        if (i == j)
+                            return false;
+                        auto distance2d = read_buffer[i].Position - read_buffer[j].Position; // from j, towards i
+                        double distance = distance2d.GetMagnitude();
+                        double threshold = (read_buffer[i].Mass + read_buffer[j].Mass) * GameManager::MASS_TO_RADIUS;
+                        if (distance < threshold)
+                        {
+                            collided[collisions_count] = j;
+                            collision_direction[collisions_count] = distance2d.GetNormalized();
+                            collision_threshold[collisions_count] = threshold;
+                            collisions_count++;
+                        }
+                        return collisions_count >= GameManager::MAX_COLLISION_COUNT;
                     }
-                }
+                );
 
                 write_buffer[i].Position = read_buffer[i].Position;
 
@@ -183,14 +188,34 @@ namespace GravityFun
                 Math::Vec2 net_acceleration(0, 0);
                 if (g)
                 {
-                    for (int j = 0; j < objects_count; j++)
+                    if (objects_count > 10)
                     {
-                        if (i == j)
-                            continue;
-                        auto distance2d = read_buffer[j].Position - read_buffer[i].Position;
-                        double distance = distance2d.GetMagnitude();
-                        double f = distance == 0 ? 0 : read_buffer[j].Mass * GameManager::MASS_GRAVITY_ACCELERATION / (distance * distance);
-                        net_acceleration += distance2d.GetNormalized() * f;
+                        object_mapper.VisitObjects(read_buffer[i].Position, GameManager::MASS_GRAVITY_RADIUS,
+                            [&](int j) -> bool
+                            {
+                                if (i == j)
+                                    return false;
+                                auto distance2d = read_buffer[j].Position - read_buffer[i].Position;
+                                double distance = distance2d.GetMagnitude();
+                                if (distance > GameManager::MASS_GRAVITY_RADIUS)
+                                    return false;
+                                double f = distance == 0 ? 0 : read_buffer[j].Mass * GameManager::MASS_GRAVITY_ACCELERATION / (distance * distance);
+                                net_acceleration += distance2d.GetNormalized() * f;
+                                return false;
+                            }
+                        );
+                    }
+                    else
+                    {
+                        for (int j = 0; j < objects_count; j++)
+                        {
+                            if (i == j)
+                                continue;
+                            auto distance2d = read_buffer[j].Position - read_buffer[i].Position;
+                            double distance = distance2d.GetMagnitude();
+                            double f = distance == 0 ? 0 : read_buffer[j].Mass * GameManager::MASS_GRAVITY_ACCELERATION / (distance * distance);
+                            net_acceleration += distance2d.GetNormalized() * f;
+                        }
                     }
                 }
                 net_acceleration.y -= down_acceleration;

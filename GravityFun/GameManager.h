@@ -4,6 +4,7 @@
 
 #include "Random.h"
 #include "FloatingObject.h"
+#include "ObjectMapper.h"
 
 #include <array>
 #include <chrono>
@@ -22,8 +23,9 @@ namespace GravityFun
         protected:
             virtual void OnRun() override;
         private:
-            PhysicsPassNotifier(GameManager*);
+            PhysicsPassNotifier(GameManager*, bool first_pass);
             GameManager * _GameManager;
+            bool FirstPass;
         };
         friend PhysicsPassNotifier;
 
@@ -43,12 +45,17 @@ namespace GravityFun
         GameManager& operator=(const GameManager&) = delete;
         GameManager& operator=(GameManager&&) = delete;
 
-        /// @brief This module has to be added after the two physics pass.
-        std::shared_ptr<PhysicsPassNotifier> GetPhysicsPassNotifier();
+        /// @brief This module has to be added after the first physics pass.
+        std::shared_ptr<PhysicsPassNotifier> GetPhysicsPass1Notifier();
+        /// @brief This module has to be added after the second physics pass.
+        std::shared_ptr<PhysicsPassNotifier> GetPhysicsPass2Notifier();
 
         static constexpr int DEFAULT_OBJECTS_COUNT = 10;
         static constexpr int MIN_OBJECTS_COUNT = 0;
         static constexpr int MAX_OBJECTS_COUNT = 1000;
+        static constexpr int OBJECT_MAPPING_SIZE_X = 32;
+        static constexpr int OBJECT_MAPPING_SIZE_Y = 16;
+        static constexpr int OBJECT_MAPPING_CELL_CAPACITY = 40;
         static constexpr double DEFAULT_MASS = 1;
         static constexpr double MIN_MASS = 0.5;
         static constexpr double MAX_MASS = 2;
@@ -62,12 +69,16 @@ namespace GravityFun
         static constexpr double MIN_PHYSICS_FIDELITY = 0;
         static constexpr double MAX_PHYSICS_FIDELITY = 1;
 
+        typedef ObjectMapper<OBJECT_MAPPING_SIZE_X, OBJECT_MAPPING_SIZE_Y, 4, 2, OBJECT_MAPPING_CELL_CAPACITY> FloatingObjectMapper;
+
         const std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetPreviousRenderBuffer();
         const std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetRenderBuffer();
         const std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetPhysicsPass1ReadBuffer();
         std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetPhysicsPass1WriteBuffer();
         const std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetPhysicsPass2ReadBuffer();
         std::array<FloatingObject, MAX_OBJECTS_COUNT>& GetPhysicsPass2WriteBuffer();
+
+        const FloatingObjectMapper& GetObjectMapper();
 
         /// @brief Used for physics.
         static constexpr int MAX_COLLISION_COUNT = 24;
@@ -79,6 +90,8 @@ namespace GravityFun
         static constexpr double DOWN_GRAVITY_ACCELERATION = 1;
         /// @brief Used for physics.
         static constexpr double MASS_GRAVITY_ACCELERATION = 0.02;
+        /// @brief Used for physics. The forces outside the radius must be negligible.
+        static constexpr double MASS_GRAVITY_RADIUS = 0.6;
         /// @brief Used for physics.
         static constexpr double MOUSE_GRAVITY_ACCELERATION = 0.1;
         /// @brief Used for physics.
@@ -121,7 +134,8 @@ namespace GravityFun
         virtual bool CanRun() override;
     private:
         std::shared_ptr<Window> _Window;
-        std::shared_ptr<PhysicsPassNotifier> _PhysicsPassNotifier;
+        std::shared_ptr<PhysicsPassNotifier> _PhysicsPass1Notifier;
+        std::shared_ptr<PhysicsPassNotifier> _PhysicsPass2Notifier;
         std::shared_ptr<EnergySaver> _EnergySaver;
         LoopScheduler::Group * RootGroup;
         LoopScheduler::Group * PhysicsPass1;
@@ -169,8 +183,10 @@ namespace GravityFun
         bool MouseMiddle;
 
         std::array<FloatingObject, MAX_OBJECTS_COUNT> ObjectBuffers[4];
+        FloatingObjectMapper _ObjectMapper;
 
-        void PhysicsPassNotify();
+        void PhysicsPassNotify(bool first_pass);
+        void UpdateMappedObjectBuffer(const std::array<FloatingObject, MAX_OBJECTS_COUNT>& object_buffer, int starting_index = 0);
 
 #if GRAVITYFUN_DEBUG
         std::chrono::steady_clock::time_point PhysicsRateLastTime;

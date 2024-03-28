@@ -7,16 +7,18 @@
 
 namespace GravityFun
 {
-    GameManager::PhysicsPassNotifier::PhysicsPassNotifier(GameManager * gm) : _GameManager(gm) {}
+    GameManager::PhysicsPassNotifier::PhysicsPassNotifier(GameManager * gm, bool first_pass) : _GameManager(gm), FirstPass(first_pass) {}
     void GameManager::PhysicsPassNotifier::OnRun()
     {
-        _GameManager->PhysicsPassNotify();
+        _GameManager->PhysicsPassNotify(FirstPass);
     }
 
     GameManager::GameManager(std::shared_ptr<Window> window, std::shared_ptr<EnergySaver> energy_saver)
         : _Window(window), _EnergySaver(energy_saver),
           RootGroup(nullptr), PhysicsPass1(nullptr), PhysicsPass2(nullptr),
-          _PhysicsPassNotifier(new PhysicsPassNotifier(this)), MainThreadId(std::this_thread::get_id()),
+          _PhysicsPass1Notifier(new PhysicsPassNotifier(this, true)),
+          _PhysicsPass2Notifier(new PhysicsPassNotifier(this, false)),
+          MainThreadId(std::this_thread::get_id()),
           TimeStrictness(1), PhysicsUpdates(1), PhysicsUpdatesSoft(1),
           ObjectsCount(DEFAULT_OBJECTS_COUNT), TimeMultiplier(DEFAULT_TIME_MULTIPLIER),
           PhysicsFidelity(DEFAULT_PHYSICS_FIDELITY),
@@ -41,6 +43,8 @@ namespace GravityFun
             for (int j = 0; j < 4; j++)
                 ObjectBuffers[j][i] = new_obj;
         }
+        UpdateMappedObjectBuffer(ObjectBuffers[PhysicsPass1ReadBufferIndex]);
+
         EnergySavingMinExec = 1 - PhysicsFidelity;
         EnergySavingMinExec = EnergySavingMinExec * EnergySavingMinExec * EnergySavingMinExec;
         _EnergySaver->SetIdlingTime(0);
@@ -137,6 +141,13 @@ namespace GravityFun
                 for (int j = 0; j < 4; j++)
                     ObjectBuffers[j][i] = new_obj;
             }
+            // Only add new missing objects without clearing
+            UpdateMappedObjectBuffer(ObjectBuffers[PhysicsPass1ReadBufferIndex], last_objects_count);
+        }
+        else if (ObjectsCount < last_objects_count)
+        {
+            // Clear and re-write from the reduced buffer
+            UpdateMappedObjectBuffer(ObjectBuffers[PhysicsPass1ReadBufferIndex]);
         }
 
         // Time multiplier
@@ -232,8 +243,14 @@ namespace GravityFun
 #endif
     }
 
-    void GameManager::PhysicsPassNotify()
+    void GameManager::PhysicsPassNotify(bool first_pass)
     {
+        int next_read_buffer_index = first_pass ? PhysicsPass1WriteBufferIndex : PhysicsPass2WriteBufferIndex;
+        UpdateMappedObjectBuffer(ObjectBuffers[next_read_buffer_index]);
+
+        if (first_pass)
+            return;
+
         PhysicsPass1ReadBufferIndex = PhysicsPass2WriteBufferIndex;
         PhysicsUpdates++;
 
@@ -242,9 +259,24 @@ namespace GravityFun
 #endif
     }
 
-    std::shared_ptr<GameManager::PhysicsPassNotifier> GameManager::GetPhysicsPassNotifier()
+    void GameManager::UpdateMappedObjectBuffer(const std::array<FloatingObject, MAX_OBJECTS_COUNT>& object_buffer, int starting_index)
     {
-        return _PhysicsPassNotifier;
+        if (starting_index == 0)
+            _ObjectMapper.Clear();
+        for (int i = starting_index; i < ObjectsCount; i++)
+        {
+            _ObjectMapper.AddObject(object_buffer[i].Position, i);
+        }
+    }
+
+    std::shared_ptr<GameManager::PhysicsPassNotifier> GameManager::GetPhysicsPass1Notifier()
+    {
+        return _PhysicsPass1Notifier;
+    }
+
+    std::shared_ptr<GameManager::PhysicsPassNotifier> GameManager::GetPhysicsPass2Notifier()
+    {
+        return _PhysicsPass2Notifier;
     }
 
     const std::array<FloatingObject, GameManager::MAX_OBJECTS_COUNT>& GameManager::GetPreviousRenderBuffer()
@@ -270,6 +302,10 @@ namespace GravityFun
     std::array<FloatingObject, GameManager::MAX_OBJECTS_COUNT>& GameManager::GetPhysicsPass2WriteBuffer()
     {
         return ObjectBuffers[PhysicsPass2WriteBufferIndex];
+    }
+    const GameManager::FloatingObjectMapper& GameManager::GetObjectMapper()
+    {
+        return _ObjectMapper;
     }
 
     double GameManager::GetTimeStrictness()
