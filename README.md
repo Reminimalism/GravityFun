@@ -1,6 +1,6 @@
 # GravityFun
 
-A simple program that simulates 2D floating objects and gravity for fun.
+A very dynamic simulation of 2D floating objects and their interactions for fun.
 The rendering is done using OpenGL with the help of GLFW and GLAD.
 
 # How to use
@@ -12,7 +12,10 @@ The controls are listed in the table below.
 | Input(s) | Control |
 | ------ | ------- |
 | G or 1 | Toggle global downward gravity |
-| R or 2 | Toggle relative gravity |
+| R or 2 | Switch between relative force modes |
+| - Q or 0 | Set relative force mode to off |
+| - W or 9 | Set relative force mode to inward (objects pulling, like gravity) |
+| - E or 8 | Set relative force mode to outward (objects pushing, like fluids) |
 | M or 3 | Toggle variable mass (when adding objects) |
 | B or 4 | Toggle border collision |
 | C or 5 | Toggle object to object collision |
