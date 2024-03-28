@@ -7,7 +7,7 @@ namespace GravityFun::Info
     /// @brief The name to print. No newline character.
     const char * const NAME = "Gravity Fun";
     /// @brief The version without 'v'. No newline character.
-    const char * const VERSION = "0.9-dev";
+    const char * const VERSION = "1.0";
 
     /// @brief Indented multiline string with extra newlines at the beginning and the end.
     const char * const DESCRIPTION = R"(
