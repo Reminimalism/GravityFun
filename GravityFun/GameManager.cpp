@@ -24,7 +24,7 @@ namespace GravityFun
           PhysicsFidelity(DEFAULT_PHYSICS_FIDELITY),
           DownGravityOn(false), RelativeGravityState(0),
           VariableMassOn(false),
-          BorderCollisionOn(true), ObjectCollisionOn(false),
+          BorderCollisionOn(true), ObjectCollisionOn(true),
           MotionBlurOn(true),
           BorderX(1), BorderY(1),
           PreviousRenderBufferIndex(0), RenderBufferIndex(1),
