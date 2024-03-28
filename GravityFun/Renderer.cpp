@@ -57,7 +57,7 @@ namespace GravityFun
         AnimatedModels.push_back(&TimeMultiplierSlider);
         AnimatedModels.push_back(&EnergySavingSlider);
         AnimationTargetFunctions[&DownGravityToggle] = [this]() { return _GameManager->IsDownGravityOn() ? 1 : 0; };
-        AnimationTargetFunctions[&RelativeGravityToggle] = [this]() { return _GameManager->IsRelativeGravityOn() ? 1 : 0; };
+        AnimationTargetFunctions[&RelativeGravityToggle] = [this]() { return _GameManager->GetRelativeGravityScale() * 0.5 + 0.5; };
         AnimationTargetFunctions[&VariableMassToggle] = [this]() { return _GameManager->IsVariableMassOn() ? 1 : 0; };
         AnimationTargetFunctions[&BorderCollisionToggle] = [this]() { return _GameManager->IsBorderCollisionOn() ? 1 : 0; };
         AnimationTargetFunctions[&ObjectCollisionToggle] = [this]() { return _GameManager->IsObjectCollisionOn() ? 1 : 0; };

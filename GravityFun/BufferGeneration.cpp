@@ -792,7 +792,7 @@ namespace GravityFun::BufferGeneration
             vertices1,
             indices,
             z, circle_resolution,
-            -0.5, 0, 0.4,
+            -0.3, 0, 0.25,
             -0.75, 0, 0.25
         );
 
@@ -802,7 +802,7 @@ namespace GravityFun::BufferGeneration
             vertices1,
             indices,
             z, circle_resolution,
-            0.5, 0, 0.4,
+            0.3, 0, 0.25,
             0.75, 0, 0.25
         );
 
@@ -812,8 +812,8 @@ namespace GravityFun::BufferGeneration
             vertices1,
             indices,
             z,
-            Math::Vec2(-0.5, 0), Math::Vec2(-0.25, 0),
-            0.05, Math::Vec2(0.1, 0.2),
+            Math::Vec2(-0.3, 0), Math::Vec2(-1, 0),
+            0.05, Math::Vec2(0.25, 0.25),
             Math::Vec2(-0.75, 0), Math::Vec2(-0.1, 0),
             0.05, Math::Vec2(0.25, 0.25)
         );
@@ -824,8 +824,8 @@ namespace GravityFun::BufferGeneration
             vertices1,
             indices,
             z,
-            Math::Vec2(0.5, 0), Math::Vec2(0.25, 0),
-            0.05, Math::Vec2(0.1, 0.2),
+            Math::Vec2(0.3, 0), Math::Vec2(1, 0),
+            0.05, Math::Vec2(0.25, 0.25),
             Math::Vec2(0.75, 0), Math::Vec2(0.1, 0),
             0.05, Math::Vec2(0.25, 0.25)
         );

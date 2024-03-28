@@ -173,6 +173,7 @@ namespace GravityFun
             last_time = time;
 
             bool g = _GameManager->IsRelativeGravityOn();
+            double g_scale = _GameManager->GetRelativeGravityScale();
             bool col = _GameManager->IsBorderCollisionOn();
             double bx = _GameManager->GetBorderX();
             double by = _GameManager->GetBorderY();
@@ -217,6 +218,7 @@ namespace GravityFun
                             net_acceleration += distance2d.GetNormalized() * f;
                         }
                     }
+                    net_acceleration = net_acceleration * g_scale;
                 }
                 net_acceleration.y -= down_acceleration;
                 // Mouse pull/push

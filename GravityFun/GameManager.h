@@ -116,6 +116,8 @@ namespace GravityFun
         double GetPhysicsFidelity();
         bool IsDownGravityOn();
         bool IsRelativeGravityOn();
+        /// @brief -1 when objects push each other, 0 when none, 1 when they pull.
+        double GetRelativeGravityScale();
         bool IsVariableMassOn();
         bool IsBorderCollisionOn();
         bool IsObjectCollisionOn();
@@ -167,7 +169,7 @@ namespace GravityFun
         /// @brief Minimum allowed physics execution timespan
         double EnergySavingMinExec;
         bool DownGravityOn;
-        bool RelativeGravityOn;
+        int RelativeGravityState;
         bool VariableMassOn;
         bool BorderCollisionOn;
         bool ObjectCollisionOn;

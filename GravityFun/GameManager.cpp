@@ -22,7 +22,7 @@ namespace GravityFun
           TimeStrictness(1), PhysicsUpdates(1), PhysicsUpdatesSoft(1),
           ObjectsCount(DEFAULT_OBJECTS_COUNT), TimeMultiplier(DEFAULT_TIME_MULTIPLIER),
           PhysicsFidelity(DEFAULT_PHYSICS_FIDELITY),
-          DownGravityOn(false), RelativeGravityOn(false),
+          DownGravityOn(false), RelativeGravityState(0),
           VariableMassOn(false),
           BorderCollisionOn(true), ObjectCollisionOn(false),
           MotionBlurOn(true),
@@ -88,7 +88,26 @@ namespace GravityFun
             DownGravityOn = !DownGravityOn;
         if (_Window->GetPressedKeys().contains(GLFW_KEY_R)
             || _Window->GetPressedKeys().contains(GLFW_KEY_2))
-            RelativeGravityOn = !RelativeGravityOn;
+        {
+            RelativeGravityState += 1;
+            if (RelativeGravityState > 1)
+                RelativeGravityState = -1;
+        }
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_Q)
+            || _Window->GetPressedKeys().contains(GLFW_KEY_0))
+        {
+            RelativeGravityState = 0;
+        }
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_W)
+            || _Window->GetPressedKeys().contains(GLFW_KEY_9))
+        {
+            RelativeGravityState = 1;
+        }
+        if (_Window->GetPressedKeys().contains(GLFW_KEY_E)
+            || _Window->GetPressedKeys().contains(GLFW_KEY_8))
+        {
+            RelativeGravityState = -1;
+        }
         if (_Window->GetPressedKeys().contains(GLFW_KEY_M)
             || _Window->GetPressedKeys().contains(GLFW_KEY_3))
             VariableMassOn = !VariableMassOn;
@@ -331,7 +350,11 @@ namespace GravityFun
     }
     bool GameManager::IsRelativeGravityOn()
     {
-        return RelativeGravityOn;
+        return RelativeGravityState != 0;
+    }
+    double GameManager::GetRelativeGravityScale()
+    {
+        return (double)RelativeGravityState;
     }
     bool GameManager::IsVariableMassOn()
     {
