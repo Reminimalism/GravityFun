@@ -4,7 +4,7 @@
 
 namespace GravityFun::Math
 {
-    class Vec2
+    class Vec2 final
     {
     public:
         Vec2();
@@ -27,7 +27,7 @@ namespace GravityFun::Math
         double GetDotProduct(const Vec2&) const;
     };
 
-    class Matrix4x4
+    class Matrix4x4 final
     {
     public:
         Matrix4x4();

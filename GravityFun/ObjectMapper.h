@@ -9,7 +9,7 @@
 namespace GravityFun
 {
     template <int SizeX, int SizeY, int AreaX, int AreaY, int CellCapacity>
-    class ObjectMapper
+    class ObjectMapper final
     {
     private:
         static constexpr double PositionToIndexX = (double)SizeX / AreaX;

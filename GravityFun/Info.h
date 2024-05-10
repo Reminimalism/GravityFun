@@ -7,7 +7,7 @@ namespace GravityFun::Info
     /// @brief The name to print. No newline character.
     const char * const NAME = "Gravity Fun";
     /// @brief The version without 'v'. No newline character.
-    const char * const VERSION = "1.0";
+    const char * const VERSION = "1.0-dev";
 
     /// @brief Indented multiline string with extra newlines at the beginning and the end.
     const char * const DESCRIPTION = R"(
@@ -15,8 +15,8 @@ namespace GravityFun::Info
         G or 1: Toggle down gravity
         R or 2: Switch between relative force modes
             Q or 0: Set relative force mode to off
-            W or 9: Set relative force mode to inward (objects pulling, like gravity)
-            E or 8: Set relative force mode to outward (objects pushing, like fluids)
+            W or 9: Set relative force mode to inward (pulling, like gravity)
+            E or 8: Set relative force mode to outward (pushing, like fluids)
         M or 3: Toggle variable mass (when adding objects)
         B or 4: Toggle border collision
         C or 5: Toggle object to object collision

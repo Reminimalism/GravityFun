@@ -4,7 +4,7 @@
 
 namespace GravityFun
 {
-    class Random
+    class Random final
     {
     public:
         Random();
