@@ -121,5 +121,21 @@ int main()
 
     loop.Run(concurrency);
 
+    // For testing no LoopScheduler (use instead of loop.Run(...))
+    //while (!window->ShouldClose())
+    //{
+    //    game_manager->GetRunningToken().Run();
+    //    renderer->GetRunningToken().Run();
+    //    for (int i = 0; i < 16; i++)
+    //    {
+    //        for (auto& pass : physics_pass1)
+    //            pass->GetRunningToken().Run();
+    //        game_manager->GetPhysicsPass1Notifier()->GetRunningToken().Run();
+    //        for (auto& pass : physics_pass2)
+    //            pass->GetRunningToken().Run();
+    //        game_manager->GetPhysicsPass2Notifier()->GetRunningToken().Run();
+    //    }
+    //}
+
     return 0;
 }
