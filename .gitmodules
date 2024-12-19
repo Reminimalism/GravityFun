@@ -1,0 +1,3 @@
+[submodule "LoopScheduler"]
+	path = LoopScheduler
+	url = https://github.com/LoopScheduler/LoopScheduler.git
